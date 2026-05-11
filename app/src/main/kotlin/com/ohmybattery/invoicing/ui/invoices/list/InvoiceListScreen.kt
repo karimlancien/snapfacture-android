@@ -1,0 +1,156 @@
+package com.ohmybattery.invoicing.ui.invoices.list
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ohmybattery.invoicing.core.money.Money
+import com.ohmybattery.invoicing.data.local.relation.InvoiceWithDetails
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun InvoiceListScreen(
+    onCreate: () -> Unit,
+    onOpen: (Long) -> Unit,
+    onSettings: () -> Unit,
+    vm: InvoiceListViewModel = hiltViewModel(),
+) {
+    val state by vm.state.collectAsStateWithLifecycle()
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Ohmybattery") },
+                actions = {
+                    IconButton(onClick = onSettings) {
+                        Icon(Icons.Default.Settings, contentDescription = "Réglages")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                ),
+            )
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = onCreate,
+                icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                text = { Text("Nouvelle facture") },
+            )
+        },
+    ) { pad ->
+        Column(modifier = Modifier.padding(pad).fillMaxSize()) {
+            MonthSummary(state.monthRevenueCents, state.monthCount)
+            if (state.invoices.isEmpty()) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        "Aucune facture pour le moment.\nAppuyez sur + pour commencer.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    )
+                }
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    items(state.invoices, key = { it.invoice.id }) { inv ->
+                        InvoiceRow(inv, onOpen)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MonthSummary(revenue: Long, count: Int) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
+    ) {
+        Column(Modifier.padding(20.dp)) {
+            Text("CA du mois", color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.labelLarge)
+            Spacer(Modifier.height(4.dp))
+            Text(
+                Money.formatEurPlain(revenue),
+                color = MaterialTheme.colorScheme.onPrimary,
+                style = MaterialTheme.typography.displayLarge,
+            )
+            Text(
+                "$count facture${if (count > 1) "s" else ""} ce mois-ci",
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+    }
+}
+
+@Composable
+private fun InvoiceRow(inv: InvoiceWithDetails, onOpen: (Long) -> Unit) {
+    val fmt = SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE)
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = { onOpen(inv.invoice.id) },
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    "Facture N° ${inv.invoice.number}",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    inv.client.name,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                )
+                Text(
+                    fmt.format(Date(inv.invoice.issueDate)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                )
+            }
+            Text(
+                Money.formatEurPlain(inv.invoice.totalTtcCents),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+    }
+}
