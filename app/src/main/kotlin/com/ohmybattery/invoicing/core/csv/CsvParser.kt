@@ -9,6 +9,8 @@ import java.io.Reader
  */
 object CsvParser {
 
+    private const val BOM: Char = '﻿'
+
     fun parse(input: Reader, separator: Char = ','): List<List<String>> {
         val reader = PushbackReader(input, 4)
         val rows = mutableListOf<List<String>>()
@@ -33,7 +35,7 @@ object CsvParser {
             val c = r.toChar()
             if (first) {
                 first = false
-                if (c == '﻿') continue
+                if (c == BOM) continue
             }
             if (inQuotes) {
                 if (c == '"') {

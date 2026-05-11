@@ -1,4 +1,4 @@
-package com.ohmybattery.invoicing.ui.`import`
+package com.ohmybattery.invoicing.ui.csvimport
 
 import android.content.Context
 import android.net.Uri
@@ -46,7 +46,7 @@ class ImportViewModel @Inject constructor(
                         ?: error("Impossible d'ouvrir le fichier")
                     input.use { stream ->
                         BufferedReader(InputStreamReader(stream, Charsets.UTF_8)).use { reader ->
-                            importer.import(reader)
+                            importer.runImport(reader)
                         }
                     }
                 }

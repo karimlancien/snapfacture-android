@@ -34,7 +34,7 @@ class InvoiceCsvImporter @Inject constructor(
         isLenient = false
     }
 
-    suspend fun import(reader: Reader): ImportReport {
+    suspend fun runImport(reader: Reader): ImportReport {
         val rows = CsvParser.parse(reader)
         if (rows.isEmpty()) return ImportReport(0, 0, null, listOf("Fichier vide"))
 
