@@ -1,4 +1,4 @@
-package com.ohmybattery.invoicing.ui.settings
+package com.ohmybattery.invoicing.ui.company
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,9 +12,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor(
+class CompanyInfoViewModel @Inject constructor(
     private val repo: CompanyRepository,
 ) : ViewModel() {
+
     val company: StateFlow<CompanyEntity?> =
         repo.observe().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
