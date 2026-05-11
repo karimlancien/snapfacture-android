@@ -10,6 +10,7 @@ import com.ohmybattery.invoicing.data.local.entity.AuditLogEntity
 import com.ohmybattery.invoicing.data.local.entity.InvoiceEntity
 import com.ohmybattery.invoicing.data.local.entity.InvoiceLineEntity
 import com.ohmybattery.invoicing.data.local.entity.InvoiceStatus
+import com.ohmybattery.invoicing.data.local.entity.InvoiceType
 import com.ohmybattery.invoicing.data.local.entity.PaymentMethod
 import com.ohmybattery.invoicing.data.local.relation.InvoiceWithDetails
 import kotlinx.coroutines.flow.Flow
@@ -50,6 +51,9 @@ class InvoiceRepository @Inject constructor(
     fun observeCountSince(since: Long): Flow<Int> = invoiceDao.observeCountSince(since)
 
     suspend fun get(id: Long): InvoiceWithDetails? = invoiceDao.getWithDetails(id)
+
+    suspend fun findCreditFor(originalId: Long): InvoiceEntity? =
+        invoiceDao.findCreditFor(originalId)
 
     suspend fun issue(input: IssueInvoiceInput): Long = db.withTransaction {
         require(input.lines.isNotEmpty()) { "Aucune ligne sur la facture" }
@@ -121,6 +125,58 @@ class InvoiceRepository @Inject constructor(
     suspend fun attachPdf(invoiceId: Long, path: String) {
         invoiceDao.setPdfPath(invoiceId, path)
         appendAudit(invoiceId, "PDF_GENERATED", path)
+    }
+
+    suspend fun issueCredit(originalId: Long, reason: String?): Long {
+        val orig = invoiceDao.getWithDetails(originalId)
+            ?: error("Facture introuvable")
+        require(orig.invoice.type == InvoiceType.INVOICE) {
+            "Impossible d'émettre un avoir sur un avoir"
+        }
+
+        val number = companyDao.peekNextInvoiceNumber()
+        companyDao.bumpInvoiceNumber()
+        val now = System.currentTimeMillis()
+
+        val credit = InvoiceEntity(
+            number = number,
+            clientId = orig.invoice.clientId,
+            issueDate = now,
+            dueDate = now,
+            deliveryDate = null,
+            totalHtCents = -orig.invoice.totalHtCents,
+            totalVatCents = -orig.invoice.totalVatCents,
+            totalTtcCents = -orig.invoice.totalTtcCents,
+            paymentMethod = orig.invoice.paymentMethod,
+            paymentDate = now,
+            paymentNote = reason?.takeIf { it.isNotBlank() },
+            status = InvoiceStatus.PAID,
+            issuerName = orig.invoice.issuerName,
+            vehicleModel = orig.invoice.vehicleModel,
+            vehicleRegistration = orig.invoice.vehicleRegistration,
+            type = InvoiceType.CREDIT_NOTE,
+            linkedInvoiceId = originalId,
+        )
+        val newId = invoiceDao.insertInvoice(credit)
+
+        val newLines = orig.lines.map { l ->
+            InvoiceLineEntity(
+                invoiceId = newId,
+                description = l.description,
+                extraNote = l.extraNote,
+                quantity = l.quantity,
+                unitPriceHtCents = -l.unitPriceHtCents,
+                vatRatePermille = l.vatRatePermille,
+                lineHtCents = -l.lineHtCents,
+                lineVatCents = -l.lineVatCents,
+                lineTtcCents = -l.lineTtcCents,
+                position = l.position,
+            )
+        }
+        invoiceDao.insertLines(newLines)
+
+        appendAudit(newId, "CREDIT_NOTE_ISSUED", "${orig.invoice.number}->$number")
+        return newId
     }
 
     private suspend fun appendAudit(invoiceId: Long?, event: String, payload: String) {

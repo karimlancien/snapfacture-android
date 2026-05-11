@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 
 enum class InvoiceStatus { DRAFT, ISSUED, PAID, CANCELLED }
 enum class PaymentMethod { CASH, TRANSFER, CARD, CHECK, OTHER }
+enum class InvoiceType { INVOICE, CREDIT_NOTE }
 
 @Entity(
     tableName = "invoices",
@@ -41,5 +42,7 @@ data class InvoiceEntity(
     val pdfPath: String? = null,
     val vehicleModel: String? = null,
     val vehicleRegistration: String? = null,
+    val type: InvoiceType = InvoiceType.INVOICE,
+    val linkedInvoiceId: Long? = null,
     val createdAt: Long = System.currentTimeMillis(),
 )

@@ -2,6 +2,7 @@ package com.ohmybattery.invoicing.data.local
 
 import androidx.room.TypeConverter
 import com.ohmybattery.invoicing.data.local.entity.InvoiceStatus
+import com.ohmybattery.invoicing.data.local.entity.InvoiceType
 import com.ohmybattery.invoicing.data.local.entity.PaymentMethod
 
 class RoomConverters {
@@ -10,4 +11,7 @@ class RoomConverters {
 
     @TypeConverter fun paymentToString(p: PaymentMethod): String = p.name
     @TypeConverter fun paymentFromString(s: String): PaymentMethod = PaymentMethod.valueOf(s)
+
+    @TypeConverter fun typeToString(t: InvoiceType): String = t.name
+    @TypeConverter fun typeFromString(s: String): InvoiceType = InvoiceType.valueOf(s)
 }

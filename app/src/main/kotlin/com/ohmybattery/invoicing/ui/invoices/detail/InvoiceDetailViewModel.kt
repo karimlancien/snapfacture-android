@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ohmybattery.invoicing.core.pdf.InvoicePdfGenerator
 import com.ohmybattery.invoicing.data.local.entity.CompanyEntity
+import com.ohmybattery.invoicing.data.local.entity.InvoiceType
 import com.ohmybattery.invoicing.data.local.relation.InvoiceWithDetails
 import com.ohmybattery.invoicing.data.repository.CompanyRepository
 import com.ohmybattery.invoicing.data.repository.InvoiceRepository
@@ -21,6 +22,10 @@ data class DetailUiState(
     val invoice: InvoiceWithDetails? = null,
     val company: CompanyEntity? = null,
     val pdfFile: File? = null,
+    val linkedCreditNumber: Int? = null,
+    val sourceInvoiceNumber: Int? = null,
+    val sourceInvoiceDate: Long? = null,
+    val isIssuingCredit: Boolean = false,
 )
 
 @HiltViewModel
@@ -42,14 +47,57 @@ class InvoiceDetailViewModel @Inject constructor(
         val inv = invoiceRepo.get(invoiceId)
         val company = companyRepo.get()
         val file = inv?.invoice?.pdfPath?.let { File(it).takeIf(File::exists) }
-        _state.update { it.copy(invoice = inv, company = company, pdfFile = file) }
+        val linked = if (inv?.invoice?.type == InvoiceType.INVOICE) invoiceRepo.findCreditFor(invoiceId) else null
+        val source = if (inv?.invoice?.type == InvoiceType.CREDIT_NOTE) {
+            inv.invoice.linkedInvoiceId?.let { invoiceRepo.get(it)?.invoice }
+        } else null
+        _state.update {
+            it.copy(
+                invoice = inv,
+                company = company,
+                pdfFile = file,
+                linkedCreditNumber = linked?.number,
+                sourceInvoiceNumber = source?.number,
+                sourceInvoiceDate = source?.issueDate,
+            )
+        }
     }
 
     fun regeneratePdf() = viewModelScope.launch {
         val inv = _state.value.invoice ?: return@launch
         val company = _state.value.company ?: return@launch
-        val file = pdfGenerator.generate(inv, company)
+        val file = pdfGenerator.generate(
+            invoice = inv,
+            company = company,
+            sourceInvoiceNumber = _state.value.sourceInvoiceNumber,
+            sourceInvoiceDateMillis = _state.value.sourceInvoiceDate,
+        )
         invoiceRepo.attachPdf(inv.invoice.id, file.absolutePath)
         _state.update { it.copy(pdfFile = file) }
+    }
+
+    fun issueCredit(reason: String?, onDone: (Long) -> Unit) {
+        val inv = _state.value.invoice ?: return
+        val company = _state.value.company ?: return
+        if (inv.invoice.type != InvoiceType.INVOICE) return
+        if (_state.value.linkedCreditNumber != null) return
+        _state.update { it.copy(isIssuingCredit = true) }
+        viewModelScope.launch {
+            try {
+                val newId = invoiceRepo.issueCredit(inv.invoice.id, reason)
+                val details = invoiceRepo.get(newId) ?: error("Avoir introuvable")
+                val file = pdfGenerator.generate(
+                    invoice = details,
+                    company = company,
+                    sourceInvoiceNumber = inv.invoice.number,
+                    sourceInvoiceDateMillis = inv.invoice.issueDate,
+                )
+                invoiceRepo.attachPdf(newId, file.absolutePath)
+                _state.update { it.copy(isIssuingCredit = false) }
+                onDone(newId)
+            } catch (_: Throwable) {
+                _state.update { it.copy(isIssuingCredit = false) }
+            }
+        }
     }
 }

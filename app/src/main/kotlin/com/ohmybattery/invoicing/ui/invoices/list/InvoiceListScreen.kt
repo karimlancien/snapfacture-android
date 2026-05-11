@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ohmybattery.invoicing.core.money.Money
+import com.ohmybattery.invoicing.data.local.entity.InvoiceType
 import com.ohmybattery.invoicing.data.local.relation.InvoiceWithDetails
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -95,7 +96,11 @@ fun InvoiceListScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     items(state.invoices, key = { it.invoice.id }) { inv ->
-                        InvoiceRow(inv, onOpen)
+                        InvoiceRow(
+                            inv = inv,
+                            isCredited = inv.invoice.id in state.creditedInvoiceIds,
+                            onOpen = onOpen,
+                        )
                     }
                 }
             }
@@ -169,8 +174,11 @@ private fun PeriodChip(current: Period, value: Period, label: String, onClick: (
 }
 
 @Composable
-private fun InvoiceRow(inv: InvoiceWithDetails, onOpen: (Long) -> Unit) {
+private fun InvoiceRow(inv: InvoiceWithDetails, isCredited: Boolean, onOpen: (Long) -> Unit) {
     val fmt = SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE)
+    val isCredit = inv.invoice.type == InvoiceType.CREDIT_NOTE
+    val amountColor = if (isCredit) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+    val titlePrefix = if (isCredit) "Avoir N° " else "Facture N° "
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = { onOpen(inv.invoice.id) },
@@ -182,8 +190,9 @@ private fun InvoiceRow(inv: InvoiceWithDetails, onOpen: (Long) -> Unit) {
         ) {
             Column(Modifier.weight(1f)) {
                 Text(
-                    "Facture N° ${inv.invoice.number}",
+                    "$titlePrefix${inv.invoice.number}",
                     style = MaterialTheme.typography.titleMedium,
+                    color = if (isCredit) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     inv.client.name,
@@ -195,11 +204,18 @@ private fun InvoiceRow(inv: InvoiceWithDetails, onOpen: (Long) -> Unit) {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                 )
+                if (isCredited) {
+                    Text(
+                        "Annulée par un avoir",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
             }
             Text(
                 Money.formatEurPlain(inv.invoice.totalTtcCents),
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
+                color = amountColor,
             )
         }
     }

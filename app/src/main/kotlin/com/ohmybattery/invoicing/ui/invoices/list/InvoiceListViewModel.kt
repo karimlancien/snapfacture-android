@@ -2,6 +2,7 @@ package com.ohmybattery.invoicing.ui.invoices.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ohmybattery.invoicing.data.local.entity.InvoiceType
 import com.ohmybattery.invoicing.data.local.relation.InvoiceWithDetails
 import com.ohmybattery.invoicing.data.repository.InvoiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +19,7 @@ enum class Period { Month, Year, All }
 
 data class InvoiceListUiState(
     val invoices: List<InvoiceWithDetails> = emptyList(),
+    val creditedInvoiceIds: Set<Long> = emptySet(),
     val monthRevenueCents: Long = 0L,
     val monthCount: Int = 0,
     val query: String = "",
@@ -48,12 +50,17 @@ class InvoiceListViewModel @Inject constructor(
             repo.observeCountSince(monthStart),
             filters,
         ) { all, revenue, count, f ->
+            val creditedIds = all
+                .filter { it.invoice.type == InvoiceType.CREDIT_NOTE }
+                .mapNotNull { it.invoice.linkedInvoiceId }
+                .toSet()
             val filtered = all
                 .filter { matchesPeriod(it, f.period) }
                 .filter { matchesQuery(it, f.query) }
                 .let { if (f.descending) it.sortedByDescending(::sortKey) else it.sortedBy(::sortKey) }
             InvoiceListUiState(
                 invoices = filtered,
+                creditedInvoiceIds = creditedIds,
                 monthRevenueCents = revenue ?: 0L,
                 monthCount = count,
                 query = f.query,

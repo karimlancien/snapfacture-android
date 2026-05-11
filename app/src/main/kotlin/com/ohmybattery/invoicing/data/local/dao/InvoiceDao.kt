@@ -24,6 +24,9 @@ interface InvoiceDao {
     @Query("SELECT * FROM invoices WHERE id = :id")
     suspend fun get(id: Long): InvoiceEntity?
 
+    @Query("SELECT * FROM invoices WHERE type = 'CREDIT_NOTE' AND linkedInvoiceId = :originalId LIMIT 1")
+    suspend fun findCreditFor(originalId: Long): InvoiceEntity?
+
     @Insert
     suspend fun insertInvoice(invoice: InvoiceEntity): Long
 

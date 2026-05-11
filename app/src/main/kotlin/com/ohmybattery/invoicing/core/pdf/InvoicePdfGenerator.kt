@@ -9,6 +9,7 @@ import android.graphics.pdf.PdfDocument
 import androidx.core.content.FileProvider
 import com.ohmybattery.invoicing.core.money.Money
 import com.ohmybattery.invoicing.data.local.entity.CompanyEntity
+import com.ohmybattery.invoicing.data.local.entity.InvoiceType
 import com.ohmybattery.invoicing.data.local.entity.PaymentMethod
 import com.ohmybattery.invoicing.data.local.relation.InvoiceWithDetails
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -26,7 +27,12 @@ class InvoicePdfGenerator @Inject constructor(
 
     private val dateFr = SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE)
 
-    fun generate(invoice: InvoiceWithDetails, company: CompanyEntity): File {
+    fun generate(
+        invoice: InvoiceWithDetails,
+        company: CompanyEntity,
+        sourceInvoiceNumber: Int? = null,
+        sourceInvoiceDateMillis: Long? = null,
+    ): File {
         val pdf = PdfDocument()
         val pageInfo = PdfDocument.PageInfo.Builder(PAGE_W, PAGE_H, 1).create()
         val page = pdf.startPage(pageInfo)
@@ -34,6 +40,9 @@ class InvoicePdfGenerator @Inject constructor(
 
         drawHeader(canvas, company, invoice)
         var cursor = MARGIN + 230f
+        if (invoice.invoice.type == InvoiceType.CREDIT_NOTE && sourceInvoiceNumber != null) {
+            cursor = drawCreditReference(canvas, sourceInvoiceNumber, sourceInvoiceDateMillis, cursor)
+        }
         cursor = drawClientBlock(canvas, invoice, cursor)
         cursor = drawInvoiceMetaBlock(canvas, invoice, cursor)
         cursor = drawLinesTable(canvas, invoice, cursor + 24f)
@@ -44,7 +53,8 @@ class InvoicePdfGenerator @Inject constructor(
         pdf.finishPage(page)
 
         val outDir = File(context.filesDir, "invoices").apply { mkdirs() }
-        val file = File(outDir, "F-${invoice.invoice.number}.pdf")
+        val prefix = if (invoice.invoice.type == InvoiceType.CREDIT_NOTE) "AV" else "F"
+        val file = File(outDir, "$prefix-${invoice.invoice.number}.pdf")
         file.outputStream().use { pdf.writeTo(it) }
         pdf.close()
         return file
@@ -56,10 +66,14 @@ class InvoicePdfGenerator @Inject constructor(
     // --- Drawing helpers ---------------------------------------------------
 
     private fun drawHeader(canvas: android.graphics.Canvas, company: CompanyEntity, inv: InvoiceWithDetails) {
-        val bandPaint = Paint().apply { color = BRAND }
+        val isCredit = inv.invoice.type == InvoiceType.CREDIT_NOTE
+        val bandColor = if (isCredit) CREDIT_BAND else BRAND
+        val accentColor = if (isCredit) CREDIT_ACCENT else ACCENT
+
+        val bandPaint = Paint().apply { color = bandColor }
         canvas.drawRect(0f, 0f, PAGE_W.toFloat(), 150f, bandPaint)
 
-        val accentPaint = Paint().apply { color = ACCENT }
+        val accentPaint = Paint().apply { color = accentColor }
         canvas.drawRect(0f, 150f, PAGE_W.toFloat(), 156f, accentPaint)
 
         val title = Paint().apply {
@@ -79,14 +93,15 @@ class InvoicePdfGenerator @Inject constructor(
         canvas.drawText("Tél. ${company.phone}  •  ${company.email}  •  ${company.website}", MARGIN, 110f, sub)
         canvas.drawText("SIREN ${company.siren}", MARGIN, 128f, sub)
 
-        val factureLabel = Paint().apply {
+        val docLabel = Paint().apply {
             color = Color.WHITE
-            textSize = 26f
+            textSize = if (isCredit) 22f else 26f
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
             textAlign = Paint.Align.RIGHT
             isAntiAlias = true
         }
-        canvas.drawText("FACTURE N° ${inv.invoice.number}", PAGE_W - MARGIN, 70f, factureLabel)
+        val docTitle = if (isCredit) "FACTURE D'AVOIR N° ${inv.invoice.number}" else "FACTURE N° ${inv.invoice.number}"
+        canvas.drawText(docTitle, PAGE_W - MARGIN, 70f, docLabel)
 
         val factureDate = Paint().apply {
             color = Color.WHITE
@@ -94,7 +109,33 @@ class InvoicePdfGenerator @Inject constructor(
             textAlign = Paint.Align.RIGHT
             isAntiAlias = true
         }
-        canvas.drawText("Émise le ${dateFr.format(Date(inv.invoice.issueDate))}", PAGE_W - MARGIN, 92f, factureDate)
+        val emissionLabel = if (isCredit) "Émis le" else "Émise le"
+        canvas.drawText("$emissionLabel ${dateFr.format(Date(inv.invoice.issueDate))}", PAGE_W - MARGIN, 92f, factureDate)
+    }
+
+    private fun drawCreditReference(
+        canvas: android.graphics.Canvas,
+        sourceNumber: Int,
+        sourceDateMillis: Long?,
+        top: Float,
+    ): Float {
+        val tag = Paint().apply { color = CREDIT_BG }
+        val rect = RectF(MARGIN, top, PAGE_W - MARGIN, top + 36f)
+        canvas.drawRoundRect(rect, 8f, 8f, tag)
+        val label = Paint().apply {
+            color = CREDIT_BAND
+            textSize = 13f
+            isAntiAlias = true
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+        }
+        val dateSuffix = sourceDateMillis?.let { " du ${dateFr.format(Date(it))}" } ?: ""
+        canvas.drawText(
+            "Annule et remplace la facture N° $sourceNumber$dateSuffix",
+            MARGIN + 14f,
+            top + 23f,
+            label,
+        )
+        return top + 48f
     }
 
     private fun drawClientBlock(canvas: android.graphics.Canvas, inv: InvoiceWithDetails, top: Float): Float {
@@ -217,6 +258,8 @@ class InvoicePdfGenerator @Inject constructor(
     }
 
     private fun drawTotalsCard(canvas: android.graphics.Canvas, inv: InvoiceWithDetails, top: Float): Float {
+        val isCredit = inv.invoice.type == InvoiceType.CREDIT_NOTE
+        val totalColor = if (isCredit) CREDIT_BAND else BRAND
         val cardLeft = PAGE_W - MARGIN - 240f
         val cardRight = PAGE_W - MARGIN
         val cardBottom = top + 92f
@@ -230,11 +273,11 @@ class InvoicePdfGenerator @Inject constructor(
             textAlign = Paint.Align.RIGHT
         }
         val totalLabel = Paint().apply {
-            color = BRAND; textSize = 14f; isAntiAlias = true
+            color = totalColor; textSize = 14f; isAntiAlias = true
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
         }
         val totalValue = Paint().apply {
-            color = BRAND; textSize = 18f; isAntiAlias = true
+            color = totalColor; textSize = 18f; isAntiAlias = true
             textAlign = Paint.Align.RIGHT
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
         }
@@ -246,7 +289,8 @@ class InvoicePdfGenerator @Inject constructor(
         canvas.drawText("TVA (20%)", cardLeft + 14f, y, label)
         canvas.drawText(Money.formatEurPlain(inv.invoice.totalVatCents), cardRight - 14f, y, value)
         y += 28f
-        canvas.drawText("TOTAL TTC", cardLeft + 14f, y, totalLabel)
+        val totalText = if (isCredit) "À REMBOURSER" else "TOTAL TTC"
+        canvas.drawText(totalText, cardLeft + 14f, y, totalLabel)
         canvas.drawText(Money.formatEurPlain(inv.invoice.totalTtcCents), cardRight - 14f, y, totalValue)
 
         return cardBottom
@@ -254,14 +298,19 @@ class InvoicePdfGenerator @Inject constructor(
 
     private fun drawPaidStamp(canvas: android.graphics.Canvas, inv: InvoiceWithDetails, top: Float) {
         if (inv.invoice.paymentDate == null) return
-        val tag = Paint().apply { color = ACCENT_SOFT }
-        val rect = RectF(MARGIN, top, MARGIN + 200f, top + 36f)
+        val isCredit = inv.invoice.type == InvoiceType.CREDIT_NOTE
+        val tag = Paint().apply { color = if (isCredit) CREDIT_BG else ACCENT_SOFT }
+        val rect = RectF(MARGIN, top, MARGIN + 230f, top + 36f)
         canvas.drawRoundRect(rect, 8f, 8f, tag)
         val label = Paint().apply {
-            color = INK; textSize = 13f; isAntiAlias = true
+            color = if (isCredit) CREDIT_BAND else INK
+            textSize = 13f
+            isAntiAlias = true
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
         }
-        canvas.drawText("PAYÉE • ${paymentLabel(inv.invoice.paymentMethod)}", MARGIN + 14f, top + 23f, label)
+        val stamp = if (isCredit) "REMBOURSÉ • ${paymentLabel(inv.invoice.paymentMethod)}"
+        else "PAYÉE • ${paymentLabel(inv.invoice.paymentMethod)}"
+        canvas.drawText(stamp, MARGIN + 14f, top + 23f, label)
     }
 
     private fun drawFooter(canvas: android.graphics.Canvas, company: CompanyEntity) {
@@ -299,6 +348,9 @@ class InvoicePdfGenerator @Inject constructor(
         private val BRAND = Color.rgb(0x0D, 0x47, 0xA1)
         private val ACCENT = Color.rgb(0xFF, 0xB3, 0x00)
         private val ACCENT_SOFT = Color.rgb(0xFF, 0xE0, 0x82)
+        private val CREDIT_BAND = Color.rgb(0xB7, 0x1C, 0x1C)
+        private val CREDIT_ACCENT = Color.rgb(0xFF, 0x8A, 0x80)
+        private val CREDIT_BG = Color.rgb(0xFF, 0xEB, 0xEE)
         private val INK = Color.rgb(0x11, 0x14, 0x18)
         private val MUTED = Color.rgb(0x6B, 0x74, 0x80)
         private val SOFT_BG = Color.rgb(0xF1, 0xF5, 0xFA)

@@ -40,7 +40,15 @@ fun OhmybatteryRoot() {
             arguments = listOf(navArgument("invoiceId") { type = NavType.LongType }),
         ) { entry ->
             val id = entry.arguments?.getLong("invoiceId") ?: 0L
-            InvoiceDetailScreen(invoiceId = id, onBack = { nav.popBackStack() })
+            InvoiceDetailScreen(
+                invoiceId = id,
+                onBack = { nav.popBackStack() },
+                onOpenInvoice = { other ->
+                    nav.navigate(Routes.detail(other)) {
+                        popUpTo(Routes.INVOICES)
+                    }
+                },
+            )
         }
         composable(Routes.SETTINGS) {
             SettingsScreen(
