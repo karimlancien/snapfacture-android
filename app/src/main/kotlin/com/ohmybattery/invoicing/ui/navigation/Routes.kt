@@ -6,6 +6,7 @@ object Routes {
     const val DETAIL = "invoices/{invoiceId}"
     const val SETTINGS = "settings"
     const val CATALOG = "catalog"
+    const val IMPORT = "import"
 
     fun detail(invoiceId: Long) = "invoices/$invoiceId"
 }
