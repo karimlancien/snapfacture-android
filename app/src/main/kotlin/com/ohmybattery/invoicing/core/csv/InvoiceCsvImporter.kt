@@ -49,23 +49,35 @@ class InvoiceCsvImporter @Inject constructor(
         val clientCache = mutableMapOf<String, Long>()
 
         for ((rowIndex, row) in data.withIndex()) {
+            val lineNo = rowIndex + 2
             try {
                 val type = idx.get(row, "type de pièce").lowercase(Locale.FRANCE)
                 if (type.isNotBlank() && !type.startsWith("facture")) {
-                    skipped++; continue
+                    skipped++
+                    continue
                 }
 
                 val numberStr = idx.get(row, "numéro")
                 val number = numberStr.trim().toIntOrNull()
-                    ?: run { errors += "Ligne ${rowIndex + 2} : numéro invalide « $numberStr »"; skipped++; continue }
+                if (number == null) {
+                    errors += "Ligne $lineNo : numéro invalide « $numberStr »"
+                    skipped++
+                    continue
+                }
 
                 val clientName = idx.get(row, "client").trim().lines().first().trim()
                 if (clientName.isBlank()) {
-                    errors += "Ligne ${rowIndex + 2} : client vide"; skipped++; continue
+                    errors += "Ligne $lineNo : client vide"
+                    skipped++
+                    continue
                 }
 
                 val issueDate = parseFr(idx.get(row, "date d'émission"))
-                    ?: run { errors += "Ligne ${rowIndex + 2} : date d'émission invalide"; skipped++; continue }
+                if (issueDate == null) {
+                    errors += "Ligne $lineNo : date d'émission invalide"
+                    skipped++
+                    continue
+                }
                 val dueDate = parseFr(idx.get(row, "date d´échéance"))
                     ?: parseFr(idx.get(row, "date d'échéance")) ?: issueDate
                 val deliveryDate = parseFr(idx.get(row, "date de livraison"))
@@ -74,7 +86,9 @@ class InvoiceCsvImporter @Inject constructor(
                 val vatCents = parseAmountCents(idx.get(row, "tva"))
                 val totalCents = parseAmountCents(idx.get(row, "montant"))
                 if (htCents == null || vatCents == null || totalCents == null) {
-                    errors += "Ligne ${rowIndex + 2} : montants invalides"; skipped++; continue
+                    errors += "Ligne $lineNo : montants invalides"
+                    skipped++
+                    continue
                 }
                 val vatRatePermille = if (htCents > 0) Math.round((vatCents * 1000.0) / htCents).toInt() else 200
 
@@ -135,7 +149,7 @@ class InvoiceCsvImporter @Inject constructor(
                 imported++
                 maxNumber = maxOf(maxNumber ?: 0, number)
             } catch (t: Throwable) {
-                errors += "Ligne ${rowIndex + 2} : ${t.message ?: t::class.simpleName}"
+                errors += "Ligne $lineNo : ${t.message ?: t::class.simpleName}"
                 skipped++
             }
         }
