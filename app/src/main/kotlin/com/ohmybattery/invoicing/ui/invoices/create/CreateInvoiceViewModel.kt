@@ -30,6 +30,10 @@ data class CartLine(
 
 data class CreateUiState(
     val clientName: String = "",
+    val clientPhone: String = "",
+    val clientAddress: String = "",
+    val vehicleModel: String = "",
+    val vehicleRegistration: String = "",
     val matchingClients: List<ClientEntity> = emptyList(),
     val selectedClient: ClientEntity? = null,
     val cart: List<CartLine> = emptyList(),
@@ -43,8 +47,19 @@ data class CreateUiState(
         ht * it.quantity
     }
     val totalVatCents: Long get() = totalTtcCents - totalHtCents
-    val canIssue: Boolean get() =
-        !isSaving && cart.isNotEmpty() && (clientName.isNotBlank() || selectedClient != null)
+
+    val hasInstallLine: Boolean get() = cart.any { it.battery.withInstall }
+
+    val canIssue: Boolean get() {
+        if (isSaving) return false
+        if (cart.isEmpty()) return false
+        if (clientName.isBlank() && selectedClient == null) return false
+        if (hasInstallLine) {
+            if (clientPhone.isBlank()) return false
+            if (clientAddress.isBlank()) return false
+        }
+        return true
+    }
 }
 
 @HiltViewModel
@@ -70,8 +85,22 @@ class CreateInvoiceViewModel @Inject constructor(
     }
 
     fun selectClient(c: ClientEntity) {
-        _state.update { it.copy(selectedClient = c, clientName = c.name, matchingClients = emptyList()) }
+        _state.update {
+            it.copy(
+                selectedClient = c,
+                clientName = c.name,
+                clientPhone = c.phone.orEmpty(),
+                clientAddress = c.addressLine.orEmpty(),
+                matchingClients = emptyList(),
+            )
+        }
     }
+
+    fun onPhoneChange(phone: String) = _state.update { it.copy(clientPhone = phone) }
+    fun onAddressChange(addr: String) = _state.update { it.copy(clientAddress = addr) }
+    fun onVehicleModelChange(s: String) = _state.update { it.copy(vehicleModel = s) }
+    fun onVehicleRegistrationChange(s: String) =
+        _state.update { it.copy(vehicleRegistration = s.uppercase()) }
 
     fun addBattery(b: BatteryEntity) {
         _state.update { st ->
@@ -101,15 +130,17 @@ class CreateInvoiceViewModel @Inject constructor(
         _state.update { it.copy(paymentMethod = m) }
     }
 
-    /** Issues the invoice + generates the PDF. Returns the persisted invoice id. */
     fun issue(onIssued: (Long) -> Unit) {
         val st = _state.value
         if (!st.canIssue) return
         _state.update { it.copy(isSaving = true, error = null) }
         viewModelScope.launch {
             try {
-                val clientId = st.selectedClient?.id
-                    ?: clientRepo.insert(ClientEntity(name = st.clientName.trim()))
+                val clientId = clientRepo.upsertByName(
+                    name = st.selectedClient?.name ?: st.clientName,
+                    phone = st.clientPhone,
+                    addressLine = st.clientAddress,
+                )
 
                 val now = System.currentTimeMillis()
                 val lines = st.cart.map { line ->
@@ -131,6 +162,8 @@ class CreateInvoiceViewModel @Inject constructor(
                         issueDateMillis = now,
                         deliveryDateMillis = if (lines.any { it.extraNote != null }) now else null,
                         issuerName = "Jubs",
+                        vehicleModel = st.vehicleModel.ifBlank { null },
+                        vehicleRegistration = st.vehicleRegistration.ifBlank { null },
                     )
                 )
                 val company = companyRepo.get() ?: error("Company missing")

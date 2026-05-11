@@ -14,4 +14,32 @@ class ClientRepository @Inject constructor(private val dao: ClientDao) {
     suspend fun get(id: Long): ClientEntity? = dao.get(id)
     suspend fun insert(client: ClientEntity): Long = dao.insert(client)
     suspend fun update(client: ClientEntity) = dao.update(client)
+
+    /**
+     * If a client with the same name exists, merge non-blank fields into it
+     * and return its id. Otherwise insert a new one.
+     */
+    suspend fun upsertByName(
+        name: String,
+        phone: String? = null,
+        addressLine: String? = null,
+    ): Long {
+        val trimmedName = name.trim()
+        val existing = dao.search(trimmedName).firstOrNull { it.name.equals(trimmedName, ignoreCase = true) }
+        if (existing == null) {
+            return dao.insert(
+                ClientEntity(
+                    name = trimmedName,
+                    phone = phone?.takeIf { it.isNotBlank() },
+                    addressLine = addressLine?.takeIf { it.isNotBlank() },
+                )
+            )
+        }
+        val merged = existing.copy(
+            phone = phone?.takeIf { it.isNotBlank() } ?: existing.phone,
+            addressLine = addressLine?.takeIf { it.isNotBlank() } ?: existing.addressLine,
+        )
+        if (merged != existing) dao.update(merged)
+        return existing.id
+    }
 }

@@ -22,6 +22,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
@@ -98,6 +100,7 @@ fun CreateInvoiceScreen(
         ) {
             item { ClientCard(state, vm) }
             item { CatalogGrid(catalog, state, vm::addBattery, vm::decrement) }
+            if (state.hasInstallLine) item { DeliveryCard(state, vm) }
             if (state.cart.isNotEmpty()) item { CartSummary(state) }
             state.error?.let { item { ErrorBanner(it) } }
         }
@@ -130,6 +133,63 @@ private fun ClientCard(state: CreateUiState, vm: CreateInvoiceViewModel) {
                     )
                     Spacer(Modifier.height(4.dp))
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DeliveryCard(state: CreateUiState, vm: CreateInvoiceViewModel) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.35f),
+        ),
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.LocationOn, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
+                Spacer(Modifier.size(8.dp))
+                Text("Pose à domicile", style = MaterialTheme.typography.titleMedium)
+            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = state.clientPhone,
+                onValueChange = vm::onPhoneChange,
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Téléphone *") },
+                singleLine = true,
+                isError = state.clientPhone.isBlank(),
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = state.clientAddress,
+                onValueChange = vm::onAddressChange,
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Adresse complète *") },
+                isError = state.clientAddress.isBlank(),
+            )
+            Spacer(Modifier.height(12.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.DirectionsCar, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.size(8.dp))
+                Text("Véhicule (optionnel)", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = state.vehicleModel,
+                    onValueChange = vm::onVehicleModelChange,
+                    modifier = Modifier.weight(1.5f),
+                    placeholder = { Text("Modèle") },
+                    singleLine = true,
+                )
+                OutlinedTextField(
+                    value = state.vehicleRegistration,
+                    onValueChange = vm::onVehicleRegistrationChange,
+                    modifier = Modifier.weight(1f),
+                    placeholder = { Text("Immat.") },
+                    singleLine = true,
+                )
             }
         }
     }

@@ -118,11 +118,31 @@ class InvoicePdfGenerator @Inject constructor(
         var y = top + 40f
         listOfNotNull(
             inv.client.addressLine,
-            listOfNotNull(inv.client.postalCode, inv.client.city).joinToString(" ").ifBlank { null },
+            listOfNotNull(inv.client.postalCode, inv.client.city)
+                .filter { it.isNotBlank() }
+                .joinToString(" ")
+                .ifBlank { null },
             inv.client.phone,
             inv.client.email,
         ).forEach { line ->
             canvas.drawText(line, MARGIN, y, sub)
+            y += 14f
+        }
+
+        val vehicleLine = listOfNotNull(inv.invoice.vehicleModel, inv.invoice.vehicleRegistration)
+            .filter { it.isNotBlank() }
+            .joinToString("  •  ")
+        if (vehicleLine.isNotBlank()) {
+            val vehicleLabel = Paint().apply {
+                color = MUTED
+                textSize = 9f
+                isAntiAlias = true
+                typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+            }
+            y += 4f
+            canvas.drawText("VÉHICULE", MARGIN, y, vehicleLabel)
+            y += 13f
+            canvas.drawText(vehicleLine, MARGIN, y, sub)
             y += 14f
         }
         return y

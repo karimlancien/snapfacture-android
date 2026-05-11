@@ -39,5 +39,7 @@ data class InvoiceEntity(
     val status: InvoiceStatus = InvoiceStatus.DRAFT,
     val issuerName: String,
     val pdfPath: String? = null,
+    val vehicleModel: String? = null,
+    val vehicleRegistration: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
 )

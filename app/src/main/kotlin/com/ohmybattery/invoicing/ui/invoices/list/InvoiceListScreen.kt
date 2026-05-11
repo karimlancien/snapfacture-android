@@ -12,15 +12,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -73,10 +79,12 @@ fun InvoiceListScreen(
     ) { pad ->
         Column(modifier = Modifier.padding(pad).fillMaxSize()) {
             MonthSummary(state.monthRevenueCents, state.monthCount)
+            FilterBar(state, vm)
             if (state.invoices.isEmpty()) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        "Aucune facture pour le moment.\nAppuyez sur + pour commencer.",
+                        if (state.query.isNotBlank()) "Aucun résultat pour « ${state.query} »"
+                        else "Aucune facture pour cette période.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     )
@@ -116,6 +124,48 @@ private fun MonthSummary(revenue: Long, count: Int) {
             )
         }
     }
+}
+
+@Composable
+private fun FilterBar(state: InvoiceListUiState, vm: InvoiceListViewModel) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        OutlinedTextField(
+            value = state.query,
+            onValueChange = vm::setQuery,
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("Rechercher (client, n° facture, immat...)") },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+            singleLine = true,
+            shape = RoundedCornerShape(28.dp),
+        )
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            PeriodChip(state.period, Period.Month, "Mois", vm::setPeriod)
+            PeriodChip(state.period, Period.Year, "Année", vm::setPeriod)
+            PeriodChip(state.period, Period.All, "Tout", vm::setPeriod)
+            Spacer(Modifier.weight(1f))
+            IconButton(onClick = vm::toggleSort) {
+                Icon(
+                    imageVector = if (state.descending) Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,
+                    contentDescription = if (state.descending) "Plus récentes d'abord" else "Plus anciennes d'abord",
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PeriodChip(current: Period, value: Period, label: String, onClick: (Period) -> Unit) {
+    FilterChip(
+        selected = current == value,
+        onClick = { onClick(value) },
+        label = { Text(label) },
+    )
 }
 
 @Composable
