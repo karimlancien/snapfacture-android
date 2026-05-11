@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
     <files-path name="invoices" path="invoices/" />
+    <files-path name="exports" path="exports/" />
     <cache-path name="cache" path="." />
     <external-files-path name="external_invoices" path="Factures/" />
 </paths>

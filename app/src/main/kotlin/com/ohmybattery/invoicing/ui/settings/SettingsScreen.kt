@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.Button
@@ -46,6 +47,7 @@ fun SettingsScreen(
     onBack: () -> Unit,
     onOpenCatalog: () -> Unit,
     onOpenImport: () -> Unit,
+    onOpenExport: () -> Unit,
     vm: SettingsViewModel = hiltViewModel(),
 ) {
     val company by vm.company.collectAsStateWithLifecycle()
@@ -137,6 +139,30 @@ fun SettingsScreen(
                             Text("Importer un CSV", style = MaterialTheme.typography.titleMedium)
                             Text(
                                 "Récupérer vos factures depuis votre ancien outil",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        Icon(Icons.Default.ChevronRight, contentDescription = null)
+                    }
+                }
+            }
+            item {
+                Card(onClick = onOpenExport, modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            Icons.Default.Download,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                        Spacer(Modifier.size(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text("Exporter en CSV", style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                "Envoyer toutes les factures à votre comptable",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )

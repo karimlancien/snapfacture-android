@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.ohmybattery.invoicing.ui.csvexport.ExportScreen
 import com.ohmybattery.invoicing.ui.csvimport.ImportScreen
 import com.ohmybattery.invoicing.ui.catalog.CatalogScreen
 import com.ohmybattery.invoicing.ui.invoices.create.CreateInvoiceScreen
@@ -46,6 +47,7 @@ fun OhmybatteryRoot() {
                 onBack = { nav.popBackStack() },
                 onOpenCatalog = { nav.navigate(Routes.CATALOG) },
                 onOpenImport = { nav.navigate(Routes.IMPORT) },
+                onOpenExport = { nav.navigate(Routes.EXPORT) },
             )
         }
         composable(Routes.CATALOG) {
@@ -53,6 +55,9 @@ fun OhmybatteryRoot() {
         }
         composable(Routes.IMPORT) {
             ImportScreen(onBack = { nav.popBackStack() })
+        }
+        composable(Routes.EXPORT) {
+            ExportScreen(onBack = { nav.popBackStack() })
         }
     }
 }
