@@ -1,70 +1,8 @@
-# Build log for 3b138f53128b2126d78cf0edc863f63dab9cf487
+# Build log for 94dbea177f3d62af7f7608f7e189bc65c6ea78e2
 
 ## Kotlin errors (grep e:)
 ```
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/OhmybatteryRoot.kt:13:45 Unresolved reference 'CatalogScreen'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/OhmybatteryRoot.kt:72:13 Unresolved reference 'CatalogScreen'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:54:34 Unresolved reference 'core'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:55:34 Unresolved reference 'data'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:62:9 Unresolved reference 'CatalogViewModel'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:62:28 Cannot infer type for this parameter. Please specify it explicitly.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:64:18 Cannot infer type for this parameter. Please specify it explicitly.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:64:18 Property delegate must have a 'getValue(Nothing?, KProperty0<ERROR CLASS: Cannot infer argument for type parameter T>)' method. None of the following functions is applicable:
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:64:18 Not enough information to infer type argument for 'T'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:64:21 Function invocation 'items(...)' expected.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:64:27 Cannot infer type for this parameter. Please specify it explicitly.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:64:27 Not enough information to infer type argument for 'T'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:65:20 Cannot infer type for this parameter. Please specify it explicitly.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:65:20 Not enough information to infer type argument for 'T'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:65:29 Cannot infer type for this parameter. Please specify it explicitly.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:65:46 Unresolved reference 'CatalogDraft'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:65:61 Null cannot be a value of a non-null type 'T'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:85:39 Unresolved reference 'CatalogDraft'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:91:19 Overload resolution ambiguity between candidates:
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:101:41 Unresolved reference 'id'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:104:46 Unresolved reference 'CatalogDraft'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:105:47 Unresolved reference 'toggleActive'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:113:14 Cannot infer type for this parameter. Please specify it explicitly.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:113:14 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:113:20 Cannot infer type for this parameter. Please specify it explicitly.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:114:9 @Composable invocations can only happen from the context of a @Composable function
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:117:24 Unresolved reference 'CatalogDraft'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:117:39 Unresolved reference 'save'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:124:14 Unresolved reference 'ProductEntity'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:131:42 Unresolved reference 'active'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:140:29 Unresolved reference 'withInstall'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:158:29 Unresolved reference 'label'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:160:41 Unresolved reference 'active'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:164:21 Unresolved reference 'Money'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:164:50 Unresolved reference 'priceTtcCents'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:166:41 Unresolved reference 'active'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:170:30 Unresolved reference 'active'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:178:38 Unresolved reference 'active'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:190:14 Unresolved reference 'CatalogDraft'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:192:14 Unresolved reference 'CatalogDraft'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:196:18 Cannot infer type for this parameter. Please specify it explicitly.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:196:18 Not enough information to infer type argument for 'T'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:196:18 Cannot infer type for this parameter. Please specify it explicitly.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:196:18 Not enough information to infer type argument for 'T'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:196:27 Cannot infer type for this parameter. Please specify it explicitly.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:196:29 Cannot infer type for this parameter. Please specify it explicitly.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:196:29 Not enough information to infer type argument for 'T'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:197:25 Unresolved reference 'id'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:213:31 Unresolved reference 'label'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:214:49 Unresolved reference 'copy'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:214:62 Unresolved reference 'it'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:215:27 @Composable invocations can only happen from the context of a @Composable function
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:216:33 @Composable invocations can only happen from the context of a @Composable function
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:222:31 Unresolved reference 'priceTtcEuros'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:223:49 Unresolved reference 'copy'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:223:70 Unresolved reference 'it'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:224:27 @Composable invocations can only happen from the context of a @Composable function
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:225:33 @Composable invocations can only happen from the context of a @Composable function
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:245:37 Unresolved reference 'withInstall'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:246:55 Unresolved reference 'copy'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:258:41 Unresolved reference 'active'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:259:59 Unresolved reference 'copy'.
-e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/catalog/CatalogScreen.kt:273:37 Unresolved reference 'isValid'.
+e: file:///home/runner/work/facturation-android/facturation-android/app/src/main/kotlin/com/ohmybattery/invoicing/ui/invoices/create/CreateInvoiceScreen.kt:133:24 'when' expression must be exhaustive. Add the 'CHECK', 'OTHER' branches or an 'else' branch.
 ```
 
 ## Last 200 lines of build.log
@@ -266,7 +204,7 @@ Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilat
 	... 2 more
 
 
-BUILD FAILED in 34s
-30 actionable tasks: 14 executed, 16 from cache
+BUILD FAILED in 40s
+30 actionable tasks: 19 executed, 11 from cache
 Configuration cache entry stored.
 ```
