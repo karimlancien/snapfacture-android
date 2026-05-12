@@ -7,6 +7,7 @@ import android.graphics.RectF
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import androidx.core.content.FileProvider
+import com.ohmybattery.invoicing.R
 import com.ohmybattery.invoicing.core.country.CountryProfile
 import com.ohmybattery.invoicing.core.country.FranceProfile
 import com.ohmybattery.invoicing.core.money.Money
@@ -27,7 +28,7 @@ class InvoicePdfGenerator @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
 
-    private val dateFr = SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE)
+    private val dateFmt = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
     fun generate(
         invoice: InvoiceWithDetails,
@@ -42,7 +43,7 @@ class InvoicePdfGenerator @Inject constructor(
         val page = pdf.startPage(pageInfo)
         val canvas = page.canvas
 
-        drawHeader(canvas, company, invoice)
+        drawHeader(canvas, company, invoice, country)
         var cursor = MARGIN + 230f
         if (invoice.invoice.type == InvoiceType.CREDIT_NOTE && sourceInvoiceNumber != null) {
             cursor = drawCreditReference(canvas, sourceInvoiceNumber, sourceInvoiceDateMillis, cursor)
@@ -70,7 +71,12 @@ class InvoicePdfGenerator @Inject constructor(
 
     // --- Drawing helpers ---------------------------------------------------
 
-    private fun drawHeader(canvas: android.graphics.Canvas, company: CompanyEntity, inv: InvoiceWithDetails) {
+    private fun drawHeader(
+        canvas: android.graphics.Canvas,
+        company: CompanyEntity,
+        inv: InvoiceWithDetails,
+        country: CountryProfile,
+    ) {
         val isCredit = inv.invoice.type == InvoiceType.CREDIT_NOTE
         val bandColor = if (isCredit) CREDIT_BAND else BRAND
         val accentColor = if (isCredit) CREDIT_ACCENT else ACCENT
@@ -101,8 +107,8 @@ class InvoicePdfGenerator @Inject constructor(
             isAntiAlias = true
         }
         canvas.drawText("$legalAddress, $legalPostal $legalCity", MARGIN, 92f, sub)
-        canvas.drawText("Tél. ${company.phone}  •  ${company.email}  •  ${company.website}", MARGIN, 110f, sub)
-        canvas.drawText("SIREN $legalSiren", MARGIN, 128f, sub)
+        canvas.drawText(context.getString(R.string.pdf_contact_line, company.phone, company.email, company.website), MARGIN, 110f, sub)
+        canvas.drawText("${country.legalIdLabel} $legalSiren", MARGIN, 128f, sub)
 
         val docLabel = Paint().apply {
             color = Color.WHITE
@@ -111,7 +117,10 @@ class InvoicePdfGenerator @Inject constructor(
             textAlign = Paint.Align.RIGHT
             isAntiAlias = true
         }
-        val docTitle = if (isCredit) "FACTURE D'AVOIR N° ${inv.invoice.number}" else "FACTURE N° ${inv.invoice.number}"
+        val docTitle = context.getString(
+            if (isCredit) R.string.pdf_title_credit else R.string.pdf_title_invoice,
+            inv.invoice.number,
+        )
         canvas.drawText(docTitle, PAGE_W - MARGIN, 70f, docLabel)
 
         val factureDate = Paint().apply {
@@ -120,8 +129,11 @@ class InvoicePdfGenerator @Inject constructor(
             textAlign = Paint.Align.RIGHT
             isAntiAlias = true
         }
-        val emissionLabel = if (isCredit) "Émis le" else "Émise le"
-        canvas.drawText("$emissionLabel ${dateFr.format(Date(inv.invoice.issueDate))}", PAGE_W - MARGIN, 92f, factureDate)
+        val emission = context.getString(
+            if (isCredit) R.string.pdf_issued_on_m else R.string.pdf_issued_on_f,
+            dateFmt.format(Date(inv.invoice.issueDate)),
+        )
+        canvas.drawText(emission, PAGE_W - MARGIN, 92f, factureDate)
     }
 
     private fun drawCreditReference(
@@ -139,9 +151,11 @@ class InvoicePdfGenerator @Inject constructor(
             isAntiAlias = true
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
         }
-        val dateSuffix = sourceDateMillis?.let { " du ${dateFr.format(Date(it))}" } ?: ""
+        val dateSuffix = sourceDateMillis?.let {
+            context.getString(R.string.pdf_credit_reference_date_suffix, dateFmt.format(Date(it)))
+        } ?: ""
         canvas.drawText(
-            "Annule et remplace la facture N° $sourceNumber$dateSuffix",
+            context.getString(R.string.pdf_credit_reference, sourceNumber, dateSuffix),
             MARGIN + 14f,
             top + 23f,
             label,
@@ -156,7 +170,7 @@ class InvoicePdfGenerator @Inject constructor(
             isAntiAlias = true
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
         }
-        canvas.drawText("FACTURÉ À", MARGIN, top, label)
+        canvas.drawText(context.getString(R.string.pdf_billed_to), MARGIN, top, label)
 
         val name = Paint().apply {
             color = INK
@@ -192,7 +206,7 @@ class InvoicePdfGenerator @Inject constructor(
                 typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
             }
             y += 4f
-            canvas.drawText("VÉHICULE", MARGIN, y, vehicleLabel)
+            canvas.drawText(context.getString(R.string.pdf_vehicle), MARGIN, y, vehicleLabel)
             y += 13f
             canvas.drawText(vehicleLine, MARGIN, y, sub)
             y += 14f
@@ -212,10 +226,12 @@ class InvoicePdfGenerator @Inject constructor(
         }
 
         val rows = buildList {
-            add("Date d'émission" to dateFr.format(Date(inv.invoice.issueDate)))
-            add("Échéance" to dateFr.format(Date(inv.invoice.dueDate)))
-            inv.invoice.deliveryDate?.let { add("Livraison" to dateFr.format(Date(it))) }
-            add("Mode de paiement" to paymentLabel(inv.invoice.paymentMethod))
+            add(context.getString(R.string.pdf_meta_issue_date) to dateFmt.format(Date(inv.invoice.issueDate)))
+            add(context.getString(R.string.pdf_meta_due_date) to dateFmt.format(Date(inv.invoice.dueDate)))
+            inv.invoice.deliveryDate?.let {
+                add(context.getString(R.string.pdf_meta_delivery_date) to dateFmt.format(Date(it)))
+            }
+            add(context.getString(R.string.pdf_meta_payment_method) to paymentLabel(inv.invoice.paymentMethod))
         }
 
         var y = top - 20f
@@ -238,13 +254,19 @@ class InvoicePdfGenerator @Inject constructor(
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
             isAntiAlias = true
         }
-        canvas.drawText("DESCRIPTION", MARGIN + 8f, top + 18f, headLabel)
-        canvas.drawText("QTÉ", MARGIN + 320f, top + 18f, headLabel.right())
-        canvas.drawText(if (showVat) "P.U. HT" else "P.U.", MARGIN + 400f, top + 18f, headLabel.right())
+        canvas.drawText(context.getString(R.string.pdf_col_description), MARGIN + 8f, top + 18f, headLabel)
+        canvas.drawText(context.getString(R.string.pdf_col_qty), MARGIN + 320f, top + 18f, headLabel.right())
+        canvas.drawText(
+            context.getString(if (showVat) R.string.pdf_col_unit_ht else R.string.pdf_col_unit),
+            MARGIN + 400f, top + 18f, headLabel.right(),
+        )
         if (showVat) {
-            canvas.drawText("TVA", MARGIN + 460f, top + 18f, headLabel.right())
+            canvas.drawText(context.getString(R.string.pdf_col_vat), MARGIN + 460f, top + 18f, headLabel.right())
         }
-        canvas.drawText(if (showVat) "TOTAL TTC" else "TOTAL", PAGE_W - MARGIN - 8f, top + 18f, headLabel.right())
+        canvas.drawText(
+            context.getString(if (showVat) R.string.pdf_col_total_ttc else R.string.pdf_col_total),
+            PAGE_W - MARGIN - 8f, top + 18f, headLabel.right(),
+        )
 
         var y = top + 28f
         val rowDesc = Paint().apply { color = INK; textSize = 12f; isAntiAlias = true }
@@ -281,7 +303,7 @@ class InvoicePdfGenerator @Inject constructor(
             isAntiAlias = true
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
         }
-        canvas.drawText("COMMENTAIRE", MARGIN, top + 12f, label)
+        canvas.drawText(context.getString(R.string.pdf_comment), MARGIN, top + 12f, label)
 
         val body = Paint().apply {
             color = INK
@@ -348,19 +370,21 @@ class InvoicePdfGenerator @Inject constructor(
 
         var y = top + 22f
         if (showVat) {
-            canvas.drawText("Sous-total HT", cardLeft + 14f, y, label)
+            canvas.drawText(context.getString(R.string.pdf_totals_ht), cardLeft + 14f, y, label)
             canvas.drawText(Money.formatEurPlain(inv.invoice.totalHtCents), cardRight - 14f, y, value)
             y += 22f
             val ratePct = computeVatRatePct(inv.invoice.totalHtCents, inv.invoice.totalVatCents)
-            canvas.drawText("TVA ($ratePct%)", cardLeft + 14f, y, label)
+            canvas.drawText(context.getString(R.string.pdf_totals_vat, ratePct), cardLeft + 14f, y, label)
             canvas.drawText(Money.formatEurPlain(inv.invoice.totalVatCents), cardRight - 14f, y, value)
             y += 28f
         }
-        val totalText = when {
-            isCredit -> "À REMBOURSER"
-            showVat -> "TOTAL TTC"
-            else -> "TOTAL"
-        }
+        val totalText = context.getString(
+            when {
+                isCredit -> R.string.pdf_totals_to_refund
+                showVat -> R.string.pdf_totals_total_ttc
+                else -> R.string.pdf_totals_total
+            },
+        )
         canvas.drawText(totalText, cardLeft + 14f, y, totalLabel)
         canvas.drawText(Money.formatEurPlain(inv.invoice.totalTtcCents), cardRight - 14f, y, totalValue)
 
@@ -388,8 +412,10 @@ class InvoicePdfGenerator @Inject constructor(
             isAntiAlias = true
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
         }
-        val stamp = if (isCredit) "REMBOURSÉ • ${paymentLabel(inv.invoice.paymentMethod)}"
-        else "PAYÉE • ${paymentLabel(inv.invoice.paymentMethod)}"
+        val stamp = context.getString(
+            if (isCredit) R.string.pdf_refunded_stamp else R.string.pdf_paid_stamp,
+            paymentLabel(inv.invoice.paymentMethod),
+        )
         canvas.drawText(stamp, MARGIN + 14f, top + 23f, label)
     }
 
@@ -413,7 +439,7 @@ class InvoicePdfGenerator @Inject constructor(
         val small = Paint().apply { color = MUTED; textSize = 9f; isAntiAlias = true }
         canvas.drawText("$legalName — ${country.legalIdLabel} $legalSiren", MARGIN, PAGE_H - 70f, small)
         canvas.drawText("$legalAddress, $legalPostal $legalCity, ${company.country}", MARGIN, PAGE_H - 58f, small)
-        canvas.drawText("Tél. ${company.phone}  •  ${company.email}  •  ${company.website}", MARGIN, PAGE_H - 46f, small)
+        canvas.drawText(context.getString(R.string.pdf_contact_line, company.phone, company.email, company.website), MARGIN, PAGE_H - 46f, small)
         val effectiveTaxOptedOut = inv.invoice.taxOptedOutAtIssue ?: (inv.invoice.totalVatCents == 0L)
         country.footerMention(effectiveTaxOptedOut)?.let { mention ->
             canvas.drawText(mention, MARGIN, PAGE_H - 32f, small)
@@ -422,16 +448,21 @@ class InvoicePdfGenerator @Inject constructor(
         val signature = Paint().apply {
             color = MUTED; textSize = 10f; isAntiAlias = true; textAlign = Paint.Align.RIGHT
         }
-        canvas.drawText("$legalManager • Gérant", PAGE_W - MARGIN, PAGE_H - 46f, signature)
+        canvas.drawText(
+            context.getString(R.string.pdf_footer_manager, legalManager),
+            PAGE_W - MARGIN, PAGE_H - 46f, signature,
+        )
     }
 
-    private fun paymentLabel(method: PaymentMethod): String = when (method) {
-        PaymentMethod.CASH -> "Espèces"
-        PaymentMethod.TRANSFER -> "Virement"
-        PaymentMethod.CARD -> "Carte bancaire"
-        PaymentMethod.CHECK -> "Chèque"
-        PaymentMethod.OTHER -> "Autre"
-    }
+    private fun paymentLabel(method: PaymentMethod): String = context.getString(
+        when (method) {
+            PaymentMethod.CASH -> R.string.create_payment_cash
+            PaymentMethod.TRANSFER -> R.string.create_payment_transfer
+            PaymentMethod.CARD -> R.string.create_payment_card
+            PaymentMethod.CHECK -> R.string.create_payment_check
+            PaymentMethod.OTHER -> R.string.create_payment_other
+        },
+    )
 
     private fun Paint.right(): Paint = Paint(this).apply { textAlign = Paint.Align.RIGHT }
 

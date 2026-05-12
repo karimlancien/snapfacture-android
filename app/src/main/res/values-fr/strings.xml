@@ -222,4 +222,35 @@
     <string name="restore_done_title">Restauration terminée</string>
     <string name="restore_done_body">L\'app va redémarrer pour appliquer la nouvelle base.</string>
     <string name="restore_done_relaunch">Redémarrer maintenant</string>
+
+    <!-- PDF -->
+    <string name="pdf_title_invoice">FACTURE N° %1$d</string>
+    <string name="pdf_title_credit">FACTURE D\'AVOIR N° %1$d</string>
+    <string name="pdf_issued_on_f">Émise le %1$s</string>
+    <string name="pdf_issued_on_m">Émis le %1$s</string>
+    <string name="pdf_billed_to">FACTURÉ À</string>
+    <string name="pdf_vehicle">VÉHICULE</string>
+    <string name="pdf_comment">COMMENTAIRE</string>
+    <string name="pdf_meta_issue_date">Date d\'émission</string>
+    <string name="pdf_meta_due_date">Échéance</string>
+    <string name="pdf_meta_delivery_date">Livraison</string>
+    <string name="pdf_meta_payment_method">Mode de paiement</string>
+    <string name="pdf_col_description">DESCRIPTION</string>
+    <string name="pdf_col_qty">QTÉ</string>
+    <string name="pdf_col_unit_ht">P.U. HT</string>
+    <string name="pdf_col_unit">P.U.</string>
+    <string name="pdf_col_vat">TVA</string>
+    <string name="pdf_col_total_ttc">TOTAL TTC</string>
+    <string name="pdf_col_total">TOTAL</string>
+    <string name="pdf_totals_ht">Sous-total HT</string>
+    <string name="pdf_totals_vat">TVA (%1$s%%)</string>
+    <string name="pdf_totals_total_ttc">TOTAL TTC</string>
+    <string name="pdf_totals_to_refund">À REMBOURSER</string>
+    <string name="pdf_totals_total">TOTAL</string>
+    <string name="pdf_paid_stamp">PAYÉE • %1$s</string>
+    <string name="pdf_refunded_stamp">REMBOURSÉ • %1$s</string>
+    <string name="pdf_credit_reference">Annule et remplace la facture N° %1$d%2$s</string>
+    <string name="pdf_credit_reference_date_suffix"> du %1$s</string>
+    <string name="pdf_footer_manager">%1$s • Gérant</string>
+    <string name="pdf_contact_line">Tél. %1$s  •  %2$s  •  %3$s</string>
 </resources>
