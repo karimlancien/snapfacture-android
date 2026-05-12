@@ -4,6 +4,13 @@
 
 Pas de cloud, pas d'abonnement, pas de compte à créer. Tes données restent sur ton téléphone.
 
+<!-- Captures d'écran : déposer les images dans docs/screenshots/ puis dé-commenter ci-dessous -->
+<!--
+| Liste | Création | Détail |
+|---|---|---|
+| ![Liste des factures](docs/screenshots/list.png) | ![Création](docs/screenshots/create.png) | ![Détail](docs/screenshots/detail.png) |
+-->
+
 ---
 
 ## Pour qui ?
@@ -43,6 +50,8 @@ Pas de cloud, pas d'abonnement, pas de compte à créer. Tes données restent su
 - **Aucune donnée n'est envoyée** vers Internet, jamais
 - **Aucun pistage**, aucune analytique, aucune télémétrie
 - Si tu veux sauvegarder, **c'est toi qui choisis où** (Google Drive, stockage local, etc.) via le sélecteur de dossier
+
+Détails complets : [PRIVACY.md](PRIVACY.md).
 
 ## Compiler depuis les sources
 
@@ -99,6 +108,8 @@ No cloud, no subscription, no account. Your data stays on your phone.
 - **No data ever leaves the device**
 - **No tracking, no analytics, no telemetry**
 - Backups go where **you** decide (Google Drive folder, local storage, …)
+
+Full details: [PRIVACY.md](PRIVACY.md).
 
 ## Build from source
 
