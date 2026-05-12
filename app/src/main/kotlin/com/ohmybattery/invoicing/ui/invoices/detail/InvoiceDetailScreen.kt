@@ -41,12 +41,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ohmybattery.invoicing.R
 import com.ohmybattery.invoicing.core.money.Money
 import com.ohmybattery.invoicing.core.pdf.ShareInvoice
 import com.ohmybattery.invoicing.data.local.entity.InvoiceType
@@ -70,15 +73,17 @@ fun InvoiceDetailScreen(
     var showCreditDialog by remember { mutableStateOf(false) }
 
     val isCredit = inv?.invoice?.type == InvoiceType.CREDIT_NOTE
-    val titlePrefix = if (isCredit) "Avoir" else "Facture"
+    val numberStr = inv?.invoice?.number?.let { "N° $it" } ?: ""
+    val title = if (isCredit) stringResource(R.string.detail_credit_n, numberStr)
+    else stringResource(R.string.detail_invoice_n, numberStr)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("$titlePrefix ${inv?.invoice?.number?.let { "N° $it" } ?: ""}") },
+                title = { Text(title) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -105,19 +110,22 @@ fun InvoiceDetailScreen(
                     ) {
                         Row(
                             Modifier.padding(16.dp),
-                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Icon(Icons.Default.Undo, contentDescription = null, tint = MaterialTheme.colorScheme.onErrorContainer)
                             Spacer(Modifier.size(12.dp))
                             Column(Modifier.weight(1f)) {
                                 Text(
-                                    "Avoir sur facture N° ${state.sourceInvoiceNumber}",
+                                    stringResource(R.string.detail_credit_for, state.sourceInvoiceNumber ?: 0),
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onErrorContainer,
                                 )
                                 state.sourceInvoiceDate?.let {
                                     Text(
-                                        "Émise le ${SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE).format(Date(it))}",
+                                        stringResource(
+                                            R.string.detail_credit_source_date,
+                                            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(it)),
+                                        ),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onErrorContainer,
                                     )
@@ -125,7 +133,7 @@ fun InvoiceDetailScreen(
                             }
                             TextButton(
                                 onClick = { inv.invoice.linkedInvoiceId?.let(onOpenInvoice) },
-                            ) { Text("Voir") }
+                            ) { Text(stringResource(R.string.detail_credit_open_source)) }
                         }
                     }
                 }
@@ -137,11 +145,11 @@ fun InvoiceDetailScreen(
                             containerColor = MaterialTheme.colorScheme.errorContainer,
                         ),
                     ) {
-                        Row(Modifier.padding(16.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Undo, contentDescription = null, tint = MaterialTheme.colorScheme.onErrorContainer)
                             Spacer(Modifier.size(12.dp))
                             Text(
-                                "Annulée par l'avoir N° ${state.linkedCreditNumber}",
+                                stringResource(R.string.detail_credited_by, state.linkedCreditNumber ?: 0),
                                 color = MaterialTheme.colorScheme.onErrorContainer,
                                 style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.weight(1f),
@@ -153,26 +161,35 @@ fun InvoiceDetailScreen(
             item {
                 Card {
                     Column(Modifier.padding(16.dp)) {
-                        val df = SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE)
+                        val df = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                         Text(inv.client.name, style = MaterialTheme.typography.titleLarge)
                         Spacer(Modifier.height(4.dp))
-                        Text("Émis${if (isCredit) "" else "e"} le ${df.format(Date(inv.invoice.issueDate))}", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("Mode de paiement : ${labelFor(inv.invoice.paymentMethod)}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            stringResource(
+                                if (isCredit) R.string.detail_issued_on_m else R.string.detail_issued_on_f,
+                                df.format(Date(inv.invoice.issueDate)),
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Text(
+                            stringResource(R.string.detail_payment_method, paymentLabel(inv.invoice.paymentMethod)),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                         inv.invoice.paymentNote?.takeIf { it.isNotBlank() }?.let {
                             Spacer(Modifier.height(4.dp))
-                            Text("Motif : $it", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.detail_motif, it), color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         inv.invoice.comment?.takeIf { it.isNotBlank() }?.let {
                             Spacer(Modifier.height(4.dp))
-                            Text("Commentaire : $it", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.detail_comment, it), color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
-}
+                    }
                 }
             }
             item {
                 Card {
                     Column(Modifier.padding(16.dp)) {
-                        Text("Lignes", style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.detail_lines_section), style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.height(8.dp))
                         inv.lines.sortedBy { it.position }.forEach { l ->
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -194,7 +211,7 @@ fun InvoiceDetailScreen(
                         Spacer(Modifier.height(8.dp))
                         val hasVat = inv.invoice.totalVatCents != 0L
                         if (hasVat) {
-                            TotalRow("Total H.T.", inv.invoice.totalHtCents)
+                            TotalRow(stringResource(R.string.create_total_ht), inv.invoice.totalHtCents)
                             val ratePct = if (inv.invoice.totalHtCents != 0L) {
                                 val r = (inv.invoice.totalVatCents.toDouble() / inv.invoice.totalHtCents) * 100
                                 val rounded = Math.round(r * 10) / 10.0
@@ -206,9 +223,9 @@ fun InvoiceDetailScreen(
                         }
                         TotalRow(
                             when {
-                                isCredit -> "À rembourser"
-                                hasVat -> "Total TTC"
-                                else -> "Total"
+                                isCredit -> stringResource(R.string.detail_to_refund)
+                                hasVat -> stringResource(R.string.create_total_ttc)
+                                else -> stringResource(R.string.create_total_simple)
                             },
                             inv.invoice.totalTtcCents,
                             big = true,
@@ -236,14 +253,15 @@ fun InvoiceDetailScreen(
                     ) {
                         Icon(Icons.Default.Share, contentDescription = null)
                         Spacer(Modifier.size(8.dp))
-                        Text("Partager")
+                        Text(stringResource(R.string.detail_share))
                     }
+                    val printJobTitle = title.replace(' ', '-').replace("N°", "")
                     OutlinedButton(
                         onClick = {
                             val file = state.pdfFile ?: return@OutlinedButton
                             val pm = context.getSystemService(android.content.Context.PRINT_SERVICE) as PrintManager
                             pm.print(
-                                "${titlePrefix}-${inv.invoice.number}",
+                                printJobTitle.ifBlank { "Invoice" },
                                 FilePrintAdapter(file),
                                 PrintAttributes.Builder()
                                     .setMediaSize(PrintAttributes.MediaSize.ISO_A4)
@@ -255,7 +273,7 @@ fun InvoiceDetailScreen(
                     ) {
                         Icon(Icons.Default.Print, contentDescription = null)
                         Spacer(Modifier.size(8.dp))
-                        Text("Imprimer")
+                        Text(stringResource(R.string.detail_print))
                     }
                 }
             }
@@ -270,7 +288,7 @@ fun InvoiceDetailScreen(
                     ) {
                         Icon(Icons.Default.Undo, contentDescription = null)
                         Spacer(Modifier.size(8.dp))
-                        Text("Émettre un avoir (annuler cette facture)")
+                        Text(stringResource(R.string.detail_issue_credit))
                     }
                 }
             }
@@ -278,7 +296,7 @@ fun InvoiceDetailScreen(
                 OutlinedButton(
                     onClick = vm::regeneratePdf,
                     modifier = Modifier.fillMaxWidth(),
-                ) { Text("Régénérer le PDF") }
+                ) { Text(stringResource(R.string.detail_regenerate_pdf)) }
             }
         }
     }
@@ -306,11 +324,11 @@ private fun CreditDialog(
     var reason by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = { if (!isSaving) onDismiss() },
-        title = { Text("Émettre un avoir") },
+        title = { Text(stringResource(R.string.credit_dialog_title)) },
         text = {
             Column {
                 Text(
-                    "Un avoir va être généré pour annuler cette facture. La facture originale reste conservée (obligation légale).",
+                    stringResource(R.string.credit_dialog_intro),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Spacer(Modifier.height(12.dp))
@@ -318,8 +336,8 @@ private fun CreditDialog(
                     value = reason,
                     onValueChange = { reason = it },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Motif (optionnel)") },
-                    placeholder = { Text("Ex: erreur de saisie, retour batterie...") },
+                    label = { Text(stringResource(R.string.credit_dialog_motif_label)) },
+                    placeholder = { Text(stringResource(R.string.credit_dialog_motif_hint)) },
                 )
             }
         },
@@ -338,12 +356,14 @@ private fun CreditDialog(
                         strokeWidth = 2.dp,
                     )
                 } else {
-                    Text("Émettre l'avoir")
+                    Text(stringResource(R.string.credit_dialog_confirm))
                 }
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss, enabled = !isSaving) { Text("Annuler") }
+            TextButton(onClick = onDismiss, enabled = !isSaving) {
+                Text(stringResource(R.string.action_cancel))
+            }
         },
     )
 }
@@ -371,10 +391,13 @@ private fun TotalRow(label: String, cents: Long, big: Boolean = false, credit: B
     }
 }
 
-private fun labelFor(m: PaymentMethod) = when (m) {
-    PaymentMethod.CASH -> "Espèces"
-    PaymentMethod.TRANSFER -> "Virement"
-    PaymentMethod.CARD -> "Carte"
-    PaymentMethod.CHECK -> "Chèque"
-    PaymentMethod.OTHER -> "Autre"
-}
+@Composable
+private fun paymentLabel(m: PaymentMethod): String = stringResource(
+    when (m) {
+        PaymentMethod.CASH -> R.string.create_payment_cash
+        PaymentMethod.TRANSFER -> R.string.create_payment_transfer
+        PaymentMethod.CARD -> R.string.create_payment_card
+        PaymentMethod.CHECK -> R.string.create_payment_check
+        PaymentMethod.OTHER -> R.string.create_payment_other
+    },
+)

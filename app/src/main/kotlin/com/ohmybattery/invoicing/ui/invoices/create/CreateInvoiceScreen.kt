@@ -1,8 +1,6 @@
 package com.ohmybattery.invoicing.ui.invoices.create
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -48,14 +45,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ohmybattery.invoicing.R
 import com.ohmybattery.invoicing.core.money.Money
-import com.ohmybattery.invoicing.data.local.entity.ProductEntity
 import com.ohmybattery.invoicing.data.local.entity.PaymentMethod
+import com.ohmybattery.invoicing.data.local.entity.ProductEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,10 +68,10 @@ fun CreateInvoiceScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nouvelle facture") },
+                title = { Text(stringResource(R.string.create_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -116,14 +114,14 @@ private fun ClientCard(state: CreateUiState, vm: CreateInvoiceViewModel) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Spacer(Modifier.size(8.dp))
-                Text("Client", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.create_client_section), style = MaterialTheme.typography.titleMedium)
             }
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = state.clientName,
                 onValueChange = vm::onClientNameChange,
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Nom du client") },
+                placeholder = { Text(stringResource(R.string.create_client_name_hint)) },
                 singleLine = true,
             )
             if (state.matchingClients.isNotEmpty()) {
@@ -151,14 +149,14 @@ private fun DeliveryCard(state: CreateUiState, vm: CreateInvoiceViewModel) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.LocationOn, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
                 Spacer(Modifier.size(8.dp))
-                Text("Coordonnées du service", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.create_delivery_section), style = MaterialTheme.typography.titleMedium)
             }
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = state.clientPhone,
                 onValueChange = vm::onPhoneChange,
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Téléphone *") },
+                placeholder = { Text(stringResource(R.string.create_phone_required)) },
                 singleLine = true,
                 isError = state.clientPhone.isBlank(),
             )
@@ -167,7 +165,7 @@ private fun DeliveryCard(state: CreateUiState, vm: CreateInvoiceViewModel) {
                 value = state.clientEmail,
                 onValueChange = vm::onEmailChange,
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Email (pour envoi auto de la facture)") },
+                placeholder = { Text(stringResource(R.string.create_email_hint)) },
                 singleLine = true,
             )
             Spacer(Modifier.height(8.dp))
@@ -175,14 +173,18 @@ private fun DeliveryCard(state: CreateUiState, vm: CreateInvoiceViewModel) {
                 value = state.clientAddress,
                 onValueChange = vm::onAddressChange,
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Adresse complète *") },
+                placeholder = { Text(stringResource(R.string.create_address_required)) },
                 isError = state.clientAddress.isBlank(),
             )
             Spacer(Modifier.height(12.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.DirectionsCar, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.size(8.dp))
-                Text("Véhicule (optionnel)", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    stringResource(R.string.create_vehicle_section),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -190,14 +192,14 @@ private fun DeliveryCard(state: CreateUiState, vm: CreateInvoiceViewModel) {
                     value = state.vehicleModel,
                     onValueChange = vm::onVehicleModelChange,
                     modifier = Modifier.weight(1.5f),
-                    placeholder = { Text("Modèle") },
+                    placeholder = { Text(stringResource(R.string.create_vehicle_model)) },
                     singleLine = true,
                 )
                 OutlinedTextField(
                     value = state.vehicleRegistration,
                     onValueChange = vm::onVehicleRegistrationChange,
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Immat.") },
+                    placeholder = { Text(stringResource(R.string.create_vehicle_plate)) },
                     singleLine = true,
                 )
             }
@@ -216,7 +218,7 @@ private fun CatalogGrid(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Default.Bolt, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
             Spacer(Modifier.size(8.dp))
-            Text("Catalogue", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.create_catalog_section), style = MaterialTheme.typography.titleMedium)
         }
         Spacer(Modifier.height(8.dp))
         LazyVerticalGrid(
@@ -262,7 +264,7 @@ private fun ProductTile(
                     Spacer(Modifier.size(4.dp))
                 }
                 Text(
-                    if (b.withInstall) "Avec service à domicile" else "Produit seul",
+                    stringResource(if (b.withInstall) R.string.create_with_service else R.string.create_product_only),
                     style = MaterialTheme.typography.labelLarge,
                     color = if (selected) MaterialTheme.colorScheme.onPrimary
                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
@@ -314,7 +316,7 @@ private fun ProductTile(
 private fun CartSummary(state: CreateUiState) {
     Card {
         Column(Modifier.padding(16.dp)) {
-            Text("Détail", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.create_cart_section), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
             state.cart.forEach { line ->
                 Row(
@@ -328,12 +330,12 @@ private fun CartSummary(state: CreateUiState) {
             }
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
             if (state.totalVatCents != 0L) {
-                TotalRow("Total H.T.", state.totalHtCents)
-                TotalRow("TVA (20%)", state.totalVatCents)
+                TotalRow(stringResource(R.string.create_total_ht), state.totalHtCents)
+                TotalRow(stringResource(R.string.create_total_vat), state.totalVatCents)
                 Spacer(Modifier.height(6.dp))
-                TotalRow("Total TTC", state.totalTtcCents, big = true)
+                TotalRow(stringResource(R.string.create_total_ttc), state.totalTtcCents, big = true)
             } else {
-                TotalRow("Total", state.totalTtcCents, big = true)
+                TotalRow(stringResource(R.string.create_total_simple), state.totalTtcCents, big = true)
             }
         }
     }
@@ -363,14 +365,14 @@ private fun CommentCard(state: CreateUiState, vm: CreateInvoiceViewModel) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Notes, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Spacer(Modifier.size(8.dp))
-                Text("Commentaire", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.create_comment_section), style = MaterialTheme.typography.titleMedium)
             }
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = state.comment,
                 onValueChange = vm::onCommentChange,
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Particularités, notes internes (optionnel)") },
+                placeholder = { Text(stringResource(R.string.create_comment_hint)) },
                 maxLines = 3,
             )
         }
@@ -400,10 +402,17 @@ private fun BottomCashBar(
     isSaving: Boolean,
     onIssue: () -> Unit,
 ) {
+    val cashLabel = stringResource(R.string.create_payment_cash)
+    val cardLabel = stringResource(R.string.create_payment_card)
+    val transferLabel = stringResource(R.string.create_payment_transfer)
     Surface(tonalElevation = 6.dp) {
         Column(Modifier.padding(16.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(PaymentMethod.CASH to "Espèces", PaymentMethod.CARD to "Carte", PaymentMethod.TRANSFER to "Virement")
+                listOf(
+                    PaymentMethod.CASH to cashLabel,
+                    PaymentMethod.CARD to cardLabel,
+                    PaymentMethod.TRANSFER to transferLabel,
+                )
                     .forEach { (m, label) ->
                         FilterChip(
                             selected = paymentMethod == m,
@@ -429,7 +438,7 @@ private fun BottomCashBar(
                     )
                 } else {
                     Text(
-                        "Encaisser • ${Money.formatEurPlain(totalTtc)}",
+                        stringResource(R.string.create_cash_in, Money.formatEurPlain(totalTtc)),
                         style = MaterialTheme.typography.titleMedium,
                     )
                 }

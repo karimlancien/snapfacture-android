@@ -31,7 +31,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.ohmybattery.invoicing.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,10 +48,10 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Réglages") },
+                title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -68,40 +70,40 @@ fun SettingsScreen(
             item {
                 SettingsCard(
                     icon = Icons.Default.Inventory2,
-                    title = "Catalogue produits",
-                    subtitle = "Ajouter, modifier ou désactiver les batteries",
+                    title = stringResource(R.string.settings_catalog_title),
+                    subtitle = stringResource(R.string.settings_catalog_subtitle),
                     onClick = onOpenCatalog,
                 )
             }
             item {
                 SettingsCard(
                     icon = Icons.Default.UploadFile,
-                    title = "Importer un CSV",
-                    subtitle = "Récupérer vos factures depuis votre ancien outil",
+                    title = stringResource(R.string.settings_import_title),
+                    subtitle = stringResource(R.string.settings_import_subtitle),
                     onClick = onOpenImport,
                 )
             }
             item {
                 SettingsCard(
                     icon = Icons.Default.Download,
-                    title = "Exporter en CSV",
-                    subtitle = "Envoyer toutes les factures à votre comptable",
+                    title = stringResource(R.string.settings_export_title),
+                    subtitle = stringResource(R.string.settings_export_subtitle),
                     onClick = onOpenExport,
                 )
             }
             item {
                 SettingsCard(
                     icon = Icons.Default.Backup,
-                    title = "Sauvegarde automatique",
-                    subtitle = "Copie de la base après chaque facture (Drive, OneDrive...)",
+                    title = stringResource(R.string.settings_backup_title),
+                    subtitle = stringResource(R.string.settings_backup_subtitle),
                     onClick = onOpenBackup,
                 )
             }
             item {
                 SettingsCard(
                     icon = Icons.Default.Business,
-                    title = "Entreprise",
-                    subtitle = "Coordonnées, SIREN, numéro de facture",
+                    title = stringResource(R.string.settings_company_title),
+                    subtitle = stringResource(R.string.settings_company_subtitle),
                     onClick = onOpenCompany,
                 )
             }

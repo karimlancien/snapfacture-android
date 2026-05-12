@@ -25,8 +25,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import com.ohmybattery.invoicing.core.country.CountryProfiles
-import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -34,10 +32,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ohmybattery.invoicing.R
+import com.ohmybattery.invoicing.core.country.CountryProfiles
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,10 +78,10 @@ fun CompanyInfoScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Entreprise") },
+                title = { Text(stringResource(R.string.company_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -95,21 +97,26 @@ fun CompanyInfoScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            item { OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Raison sociale") }, modifier = Modifier.fillMaxWidth()) }
-            item { OutlinedTextField(value = siren, onValueChange = { siren = it }, label = { Text("SIREN") }, modifier = Modifier.fillMaxWidth()) }
-            item { OutlinedTextField(value = address, onValueChange = { address = it }, label = { Text("Adresse") }, modifier = Modifier.fillMaxWidth()) }
-            item { OutlinedTextField(value = postal, onValueChange = { postal = it }, label = { Text("Code postal") }, modifier = Modifier.fillMaxWidth()) }
-            item { OutlinedTextField(value = city, onValueChange = { city = it }, label = { Text("Ville") }, modifier = Modifier.fillMaxWidth()) }
-            item { OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text("Téléphone") }, modifier = Modifier.fillMaxWidth()) }
-            item { OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth()) }
-            item { OutlinedTextField(value = website, onValueChange = { website = it }, label = { Text("Site web") }, modifier = Modifier.fillMaxWidth()) }
-            item { OutlinedTextField(value = manager, onValueChange = { manager = it }, label = { Text("Gérant") }, modifier = Modifier.fillMaxWidth()) }
-            item { OutlinedTextField(value = nextNumber, onValueChange = { nextNumber = it }, label = { Text("Prochain n° de facture") }, modifier = Modifier.fillMaxWidth()) }
+            item { OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(stringResource(R.string.company_name)) }, modifier = Modifier.fillMaxWidth()) }
+            item {
+                val countrySettings = country
+                val legalIdLabel = countrySettings?.profile?.legalIdLabel
+                    ?: stringResource(R.string.company_legal_id)
+                OutlinedTextField(value = siren, onValueChange = { siren = it }, label = { Text(legalIdLabel) }, modifier = Modifier.fillMaxWidth())
+            }
+            item { OutlinedTextField(value = address, onValueChange = { address = it }, label = { Text(stringResource(R.string.company_address)) }, modifier = Modifier.fillMaxWidth()) }
+            item { OutlinedTextField(value = postal, onValueChange = { postal = it }, label = { Text(stringResource(R.string.company_postal)) }, modifier = Modifier.fillMaxWidth()) }
+            item { OutlinedTextField(value = city, onValueChange = { city = it }, label = { Text(stringResource(R.string.company_city)) }, modifier = Modifier.fillMaxWidth()) }
+            item { OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text(stringResource(R.string.company_phone)) }, modifier = Modifier.fillMaxWidth()) }
+            item { OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text(stringResource(R.string.company_email)) }, modifier = Modifier.fillMaxWidth()) }
+            item { OutlinedTextField(value = website, onValueChange = { website = it }, label = { Text(stringResource(R.string.company_website)) }, modifier = Modifier.fillMaxWidth()) }
+            item { OutlinedTextField(value = manager, onValueChange = { manager = it }, label = { Text(stringResource(R.string.company_manager)) }, modifier = Modifier.fillMaxWidth()) }
+            item { OutlinedTextField(value = nextNumber, onValueChange = { nextNumber = it }, label = { Text(stringResource(R.string.company_next_invoice_number)) }, modifier = Modifier.fillMaxWidth()) }
 
             country?.let { settings ->
                 item {
                     Spacer(Modifier.height(8.dp))
-                    Text("Pays / régime fiscal", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.company_country_section), style = MaterialTheme.typography.titleMedium)
                 }
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -124,7 +131,10 @@ fun CompanyInfoScreen(
                 }
                 item {
                     Spacer(Modifier.height(4.dp))
-                    Text("Régime de ${settings.profile.taxLabel}", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        stringResource(R.string.company_tax_regime_section, settings.profile.taxLabel),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
                 }
                 item {
                     Card(modifier = Modifier.fillMaxWidth()) {
@@ -134,14 +144,16 @@ fun CompanyInfoScreen(
                         ) {
                             Column(Modifier.weight(1f)) {
                                 Text(
-                                    "Franchise de ${settings.profile.taxLabel}",
+                                    stringResource(R.string.company_franchise_label, settings.profile.taxLabel),
                                     style = MaterialTheme.typography.titleMedium,
                                 )
                                 Text(
-                                    if (settings.profile.code == "FR")
-                                        "À partir de maintenant, les nouvelles factures seront émises sans TVA (mention « art. 293 B du CGI »). Les factures déjà émises restent inchangées."
-                                    else
-                                        "À partir de maintenant, les nouvelles factures seront émises sans taxe. Les factures déjà émises restent inchangées.",
+                                    stringResource(
+                                        if (settings.profile.code == "FR")
+                                            R.string.company_franchise_subtitle_fr
+                                        else
+                                            R.string.company_franchise_subtitle_other,
+                                    ),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
@@ -172,7 +184,7 @@ fun CompanyInfoScreen(
                     },
                     enabled = canSave,
                     modifier = Modifier.fillMaxWidth(),
-                ) { Text("Enregistrer") }
+                ) { Text(stringResource(R.string.action_save)) }
             }
         }
     }

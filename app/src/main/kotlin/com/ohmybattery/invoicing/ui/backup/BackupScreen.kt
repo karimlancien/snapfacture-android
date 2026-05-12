@@ -40,9 +40,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ohmybattery.invoicing.R
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -75,10 +77,10 @@ fun BackupScreen(
         snackbarHost = { SnackbarHost(snackbar) { Snackbar(it) } },
         topBar = {
             TopAppBar(
-                title = { Text("Sauvegarde automatique") },
+                title = { Text(stringResource(R.string.backup_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -113,7 +115,7 @@ fun BackupScreen(
                     } else {
                         Icon(Icons.Default.Backup, contentDescription = null)
                         Spacer(Modifier.padding(end = 8.dp))
-                        Text("Sauvegarder maintenant")
+                        Text(stringResource(R.string.backup_now))
                     }
                 }
             }
@@ -125,12 +127,10 @@ fun BackupScreen(
 private fun Intro() {
     Card {
         Column(Modifier.padding(16.dp)) {
-            Text("Pourquoi sauvegarder ?", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.backup_intro_title), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(6.dp))
             Text(
-                "Choisissez un dossier (Google Drive, OneDrive, ou la carte SD). Après chaque facture ou avoir, " +
-                    "une copie complète de la base est automatiquement enregistrée dans ce dossier. " +
-                    "Si votre téléphone casse, vous récupérez l'app sur un nouvel appareil en restaurant ce fichier.",
+                stringResource(R.string.backup_intro_body),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -159,16 +159,18 @@ private fun FolderCard(
             )
             Spacer(Modifier.size(12.dp))
             Column(Modifier.weight(1f)) {
-                Text("Dossier de sauvegarde", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.backup_folder_title), style = MaterialTheme.typography.titleMedium)
                 Text(
-                    settings.folderLabel ?: settings.folderUri ?: "Aucun dossier choisi — toucher pour sélectionner",
+                    settings.folderLabel
+                        ?: settings.folderUri
+                        ?: stringResource(R.string.backup_folder_empty),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 2,
                 )
             }
             if (settings.folderUri != null) {
-                OutlinedButton(onClick = onClear) { Text("Retirer") }
+                OutlinedButton(onClick = onClear) { Text(stringResource(R.string.action_remove)) }
             }
         }
     }
@@ -185,10 +187,10 @@ private fun AutoToggle(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {
-                Text("Sauvegarder après chaque facture", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.backup_auto_title), style = MaterialTheme.typography.titleMedium)
                 Text(
-                    if (settings.folderUri == null) "Choisissez un dossier pour activer"
-                    else "Une copie est créée à chaque nouvelle facture ou avoir",
+                    if (settings.folderUri == null) stringResource(R.string.backup_auto_disabled_subtitle)
+                    else stringResource(R.string.backup_auto_enabled_subtitle),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -211,15 +213,15 @@ private fun LastBackupCard(settings: com.ohmybattery.invoicing.data.preferences.
     ) {
         Column(Modifier.padding(16.dp)) {
             Text(
-                "Dernière sauvegarde",
+                stringResource(R.string.backup_last),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(4.dp))
             Text(
                 settings.lastBackupAt?.let {
-                    SimpleDateFormat("dd/MM/yyyy à HH:mm", Locale.FRANCE).format(Date(it))
-                } ?: "Jamais",
+                    SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date(it))
+                } ?: stringResource(R.string.backup_last_never),
                 style = MaterialTheme.typography.titleMedium,
             )
         }

@@ -5,6 +5,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,11 +30,14 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ohmybattery.invoicing.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,10 +56,10 @@ fun ImportScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Importer un CSV") },
+                title = { Text(stringResource(R.string.import_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -83,7 +87,7 @@ fun ImportScreen(
                     ) {
                         Icon(Icons.Default.UploadFile, contentDescription = null)
                         Spacer(Modifier.padding(end = 8.dp))
-                        Text("Choisir un fichier .csv")
+                        Text(stringResource(R.string.import_choose_file))
                     }
                 }
                 ImportPhase.Running -> item { RunningCard() }
@@ -99,13 +103,13 @@ private fun Intro() {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(Modifier.padding(16.dp)) {
             Text(
-                "Reprendre votre historique",
+                stringResource(R.string.import_intro_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                "Importez le CSV exporté de votre ancien outil pour récupérer toutes les factures précédentes. Les numéros déjà présents sont ignorés. Le compteur de numérotation est automatiquement mis à jour.",
+                stringResource(R.string.import_intro_body),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -118,11 +122,11 @@ private fun RunningCard() {
     Card {
         Column(
             Modifier.padding(20.dp).fillMaxWidth(),
-            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             CircularProgressIndicator()
             Spacer(Modifier.height(12.dp))
-            Text("Import en cours...")
+            Text(stringResource(R.string.import_running))
         }
     }
 }
@@ -132,26 +136,37 @@ private fun DoneCard(phase: ImportPhase.Done, onPickAgain: () -> Unit, onBack: (
     val r = phase.report
     Card {
         Column(Modifier.padding(20.dp)) {
-            Text("Import terminé", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+            Text(
+                stringResource(R.string.import_done_title),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
             Spacer(Modifier.height(12.dp))
-            StatRow("Factures importées", r.imported.toString())
-            StatRow("Ignorées", r.skipped.toString())
-            r.maxImportedNumber?.let { StatRow("N° max importé", it.toString()) }
+            StatRow(stringResource(R.string.import_done_imported), r.imported.toString())
+            StatRow(stringResource(R.string.import_done_skipped), r.skipped.toString())
+            r.maxImportedNumber?.let { StatRow(stringResource(R.string.import_done_max_number), it.toString()) }
             if (r.errors.isNotEmpty()) {
                 Spacer(Modifier.height(12.dp))
-                Text("Détails", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                Text(
+                    stringResource(R.string.import_done_details),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
                 r.errors.take(20).forEach { err ->
                     Text("• $err", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                 }
                 if (r.errors.size > 20) {
-                    Text("… (+${r.errors.size - 20} autres)", style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        stringResource(R.string.import_done_more_errors, r.errors.size - 20),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
                 }
             }
             Spacer(Modifier.height(16.dp))
-            Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Retour") }
+            Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.action_back)) }
             Spacer(Modifier.height(8.dp))
             OutlinedButton(onClick = onPickAgain, modifier = Modifier.fillMaxWidth()) {
-                Text("Importer un autre fichier")
+                Text(stringResource(R.string.import_done_pick_again))
             }
         }
     }
@@ -161,18 +176,22 @@ private fun DoneCard(phase: ImportPhase.Done, onPickAgain: () -> Unit, onBack: (
 private fun ErrorCard(phase: ImportPhase.Error, onRetry: () -> Unit) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
         Column(Modifier.padding(20.dp)) {
-            Text("Import impossible", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onErrorContainer)
+            Text(
+                stringResource(R.string.import_error_title),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+            )
             Spacer(Modifier.height(8.dp))
             Text(phase.message, color = MaterialTheme.colorScheme.onErrorContainer)
             Spacer(Modifier.height(12.dp))
-            Button(onClick = onRetry, modifier = Modifier.fillMaxWidth()) { Text("Réessayer") }
+            Button(onClick = onRetry, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.action_retry)) }
         }
     }
 }
 
 @Composable
 private fun StatRow(label: String, value: String) {
-    androidx.compose.foundation.layout.Row(
+    Row(
         Modifier.fillMaxWidth().padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {

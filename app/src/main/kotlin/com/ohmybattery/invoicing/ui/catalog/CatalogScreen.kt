@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -23,7 +24,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -45,12 +45,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.foundation.text.KeyboardOptions
+import com.ohmybattery.invoicing.R
 import com.ohmybattery.invoicing.core.money.Money
 import com.ohmybattery.invoicing.data.local.entity.ProductEntity
 import kotlinx.coroutines.launch
@@ -67,10 +68,10 @@ fun CatalogScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Catalogue produits") },
+                title = { Text(stringResource(R.string.catalog_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -84,13 +85,13 @@ fun CatalogScreen(
             ExtendedFloatingActionButton(
                 onClick = { editing = CatalogDraft() },
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("Ajouter") },
+                text = { Text(stringResource(R.string.catalog_add)) },
             )
         },
     ) { pad ->
         if (items.isEmpty()) {
             Box(Modifier.padding(pad).fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Catalogue vide", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.catalog_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         } else {
             LazyColumn(
@@ -147,7 +148,7 @@ private fun ProductListItem(
                         )
                         Spacer(Modifier.size(4.dp))
                         Text(
-                            "Avec service à domicile",
+                            stringResource(R.string.catalog_with_service),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.secondary,
                         )
@@ -161,7 +162,7 @@ private fun ProductListItem(
                     else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    Money.formatEurPlain(product.priceTtcCents) + " TTC",
+                    Money.formatEurPlain(product.priceTtcCents),
                     style = MaterialTheme.typography.titleMedium,
                     color = if (product.active) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -169,7 +170,7 @@ private fun ProductListItem(
                 )
                 if (!product.active) {
                     Text(
-                        "Désactivé",
+                        stringResource(R.string.catalog_inactive),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.error,
                     )
@@ -178,7 +179,7 @@ private fun ProductListItem(
             Switch(checked = product.active, onCheckedChange = { onToggleActive() })
             Spacer(Modifier.size(4.dp))
             IconButton(onClick = onEdit) {
-                Icon(Icons.Default.Edit, contentDescription = "Modifier")
+                Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.action_edit))
             }
         }
     }
@@ -205,15 +206,15 @@ private fun EditSheet(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Text(
-                if (isNew) "Nouveau produit" else "Modifier le produit",
+                stringResource(if (isNew) R.string.catalog_edit_new_title else R.string.catalog_edit_existing_title),
                 style = MaterialTheme.typography.headlineMedium,
             )
 
             OutlinedTextField(
                 value = draft.label,
                 onValueChange = { draft = draft.copy(label = it) },
-                label = { Text("Libellé") },
-                placeholder = { Text("Ex: Torus 60Ah 540A") },
+                label = { Text(stringResource(R.string.catalog_edit_label_label)) },
+                placeholder = { Text(stringResource(R.string.catalog_edit_label_hint)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
@@ -221,8 +222,8 @@ private fun EditSheet(
             OutlinedTextField(
                 value = draft.priceTtcEuros,
                 onValueChange = { draft = draft.copy(priceTtcEuros = it) },
-                label = { Text("Prix TTC (€)") },
-                placeholder = { Text("Ex: 90,00") },
+                label = { Text(stringResource(R.string.catalog_edit_price_label)) },
+                placeholder = { Text(stringResource(R.string.catalog_edit_price_hint)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -234,9 +235,9 @@ private fun EditSheet(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(Modifier.weight(1f)) {
-                    Text("Service à domicile inclus", style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.catalog_edit_service_label), style = MaterialTheme.typography.bodyLarge)
                     Text(
-                        "Ajoute automatiquement une note de service sur la facture (intervention chez le client).",
+                        stringResource(R.string.catalog_edit_service_subtitle),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -251,8 +252,8 @@ private fun EditSheet(
                 OutlinedTextField(
                     value = draft.serviceNote,
                     onValueChange = { draft = draft.copy(serviceNote = it) },
-                    label = { Text("Note de service") },
-                    placeholder = { Text("Ex: Pose à domicile par notre technicien") },
+                    label = { Text(stringResource(R.string.catalog_edit_service_note_label)) },
+                    placeholder = { Text(stringResource(R.string.catalog_edit_service_note_hint)) },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 3,
                 )
@@ -264,7 +265,7 @@ private fun EditSheet(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("Actif dans le catalogue", style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.catalog_edit_active_label), style = MaterialTheme.typography.bodyLarge)
                     Switch(
                         checked = draft.active,
                         onCheckedChange = { draft = draft.copy(active = it) },
@@ -278,12 +279,14 @@ private fun EditSheet(
                 OutlinedButton(
                     onClick = { scope.launch { onDismiss() } },
                     modifier = Modifier.weight(1f).height(52.dp),
-                ) { Text("Annuler") }
+                ) { Text(stringResource(R.string.action_cancel)) }
                 Button(
                     onClick = { onSave(draft) },
                     enabled = draft.isValid,
                     modifier = Modifier.weight(1f).height(52.dp),
-                ) { Text(if (isNew) "Ajouter" else "Enregistrer") }
+                ) {
+                    Text(stringResource(if (isNew) R.string.catalog_edit_save_new else R.string.catalog_edit_save_existing))
+                }
             }
         }
     }

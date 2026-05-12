@@ -35,9 +35,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ohmybattery.invoicing.R
 import com.ohmybattery.invoicing.core.money.Money
 import com.ohmybattery.invoicing.data.local.entity.InvoiceType
 import com.ohmybattery.invoicing.data.local.relation.InvoiceWithDetails
@@ -60,7 +62,7 @@ fun InvoiceListScreen(
                 title = { Text(state.companyName) },
                 actions = {
                     IconButton(onClick = onSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "Réglages")
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.invoice_list_settings))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -74,7 +76,7 @@ fun InvoiceListScreen(
             ExtendedFloatingActionButton(
                 onClick = onCreate,
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("Nouvelle facture") },
+                text = { Text(stringResource(R.string.invoice_list_new)) },
             )
         },
     ) { pad ->
@@ -84,8 +86,8 @@ fun InvoiceListScreen(
             if (state.invoices.isEmpty()) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        if (state.query.isNotBlank()) "Aucun résultat pour « ${state.query} »"
-                        else "Aucune facture pour cette période.",
+                        if (state.query.isNotBlank()) stringResource(R.string.invoice_list_empty_query, state.query)
+                        else stringResource(R.string.invoice_list_empty_period),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     )
@@ -110,10 +112,15 @@ fun InvoiceListScreen(
 
 @Composable
 private fun PeriodSummary(period: Period, revenue: Long, count: Int) {
-    val (title, suffix) = when (period) {
-        Period.Month -> "CA du mois" to "ce mois-ci"
-        Period.Year -> "CA de l'année" to "cette année"
-        Period.All -> "CA total" to "au total"
+    val title = when (period) {
+        Period.Month -> stringResource(R.string.invoice_list_ca_month)
+        Period.Year -> stringResource(R.string.invoice_list_ca_year)
+        Period.All -> stringResource(R.string.invoice_list_ca_total)
+    }
+    val countLabel = when (period) {
+        Period.Month -> stringResource(R.string.invoice_list_count_month, count)
+        Period.Year -> stringResource(R.string.invoice_list_count_year, count)
+        Period.All -> stringResource(R.string.invoice_list_count_all, count)
     }
     Card(
         modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -128,7 +135,7 @@ private fun PeriodSummary(period: Period, revenue: Long, count: Int) {
                 style = MaterialTheme.typography.displayLarge,
             )
             Text(
-                "$count facture${if (count > 1) "s" else ""} $suffix",
+                countLabel,
                 color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f),
                 style = MaterialTheme.typography.bodyMedium,
             )
@@ -143,7 +150,7 @@ private fun FilterBar(state: InvoiceListUiState, vm: InvoiceListViewModel) {
             value = state.query,
             onValueChange = vm::setQuery,
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Rechercher (client, n° facture, immat...)") },
+            placeholder = { Text(stringResource(R.string.invoice_list_search_hint)) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             singleLine = true,
             shape = RoundedCornerShape(28.dp),
@@ -154,14 +161,17 @@ private fun FilterBar(state: InvoiceListUiState, vm: InvoiceListViewModel) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            PeriodChip(state.period, Period.Month, "Mois", vm::setPeriod)
-            PeriodChip(state.period, Period.Year, "Année", vm::setPeriod)
-            PeriodChip(state.period, Period.All, "Tout", vm::setPeriod)
+            PeriodChip(state.period, Period.Month, stringResource(R.string.invoice_list_period_month), vm::setPeriod)
+            PeriodChip(state.period, Period.Year, stringResource(R.string.invoice_list_period_year), vm::setPeriod)
+            PeriodChip(state.period, Period.All, stringResource(R.string.invoice_list_period_all), vm::setPeriod)
             Spacer(Modifier.weight(1f))
             IconButton(onClick = vm::toggleSort) {
                 Icon(
                     imageVector = if (state.descending) Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,
-                    contentDescription = if (state.descending) "Plus récentes d'abord" else "Plus anciennes d'abord",
+                    contentDescription = if (state.descending)
+                        stringResource(R.string.invoice_list_sort_desc_desc)
+                    else
+                        stringResource(R.string.invoice_list_sort_desc_asc),
                     tint = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -180,10 +190,13 @@ private fun PeriodChip(current: Period, value: Period, label: String, onClick: (
 
 @Composable
 private fun InvoiceRow(inv: InvoiceWithDetails, isCredited: Boolean, onOpen: (Long) -> Unit) {
-    val fmt = SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE)
+    val fmt = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     val isCredit = inv.invoice.type == InvoiceType.CREDIT_NOTE
     val amountColor = if (isCredit) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-    val titlePrefix = if (isCredit) "Avoir N° " else "Facture N° "
+    val title = if (isCredit)
+        stringResource(R.string.invoice_list_credit_n, inv.invoice.number)
+    else
+        stringResource(R.string.invoice_list_invoice_n, inv.invoice.number)
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = { onOpen(inv.invoice.id) },
@@ -195,7 +208,7 @@ private fun InvoiceRow(inv: InvoiceWithDetails, isCredited: Boolean, onOpen: (Lo
         ) {
             Column(Modifier.weight(1f)) {
                 Text(
-                    "$titlePrefix${inv.invoice.number}",
+                    title,
                     style = MaterialTheme.typography.titleMedium,
                     color = if (isCredit) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
                 )
@@ -211,7 +224,7 @@ private fun InvoiceRow(inv: InvoiceWithDetails, isCredited: Boolean, onOpen: (Lo
                 )
                 if (isCredited) {
                     Text(
-                        "Annulée par un avoir",
+                        stringResource(R.string.invoice_list_credited_marker),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.error,
                     )

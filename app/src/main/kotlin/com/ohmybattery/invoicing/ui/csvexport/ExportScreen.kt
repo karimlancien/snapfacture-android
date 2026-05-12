@@ -32,10 +32,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ohmybattery.invoicing.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,10 +51,10 @@ fun ExportScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Exporter en CSV") },
+                title = { Text(stringResource(R.string.export_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -78,7 +80,7 @@ fun ExportScreen(
                     ) {
                         Icon(Icons.Default.Download, contentDescription = null)
                         Spacer(Modifier.padding(end = 8.dp))
-                        Text("Générer le fichier CSV")
+                        Text(stringResource(R.string.export_generate))
                     }
                 }
                 ExportPhase.Running -> item {
@@ -89,7 +91,7 @@ fun ExportScreen(
                         ) {
                             CircularProgressIndicator()
                             Spacer(Modifier.height(12.dp))
-                            Text("Export en cours...")
+                            Text(stringResource(R.string.export_running))
                         }
                     }
                 }
@@ -97,13 +99,14 @@ fun ExportScreen(
                     Card {
                         Column(Modifier.padding(20.dp)) {
                             Text(
-                                "Export terminé",
+                                stringResource(R.string.export_done_title),
                                 style = MaterialTheme.typography.titleLarge,
                                 color = MaterialTheme.colorScheme.primary,
                             )
                             Spacer(Modifier.height(8.dp))
                             Text(
-                                "${phase.count} facture${if (phase.count > 1) "s" else ""} exportée${if (phase.count > 1) "s" else ""}",
+                                if (phase.count > 1) stringResource(R.string.export_done_count_many, phase.count)
+                                else stringResource(R.string.export_done_count_one, phase.count),
                                 style = MaterialTheme.typography.titleMedium,
                             )
                             Spacer(Modifier.height(4.dp))
@@ -113,21 +116,18 @@ fun ExportScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Spacer(Modifier.height(16.dp))
+                            val shareTitle = stringResource(R.string.export_share)
                             Button(
                                 onClick = {
                                     val uri = vm.shareUri(phase.file)
                                     val send = Intent(Intent.ACTION_SEND).apply {
                                         type = "text/csv"
                                         putExtra(Intent.EXTRA_STREAM, uri)
-                                        putExtra(Intent.EXTRA_SUBJECT, "Export factures Ohmybattery")
-                                        putExtra(
-                                            Intent.EXTRA_TEXT,
-                                            "Bonjour,\n\nVeuillez trouver ci-joint l'export des factures Ohmybattery.\n\nCordialement.",
-                                        )
+                                        putExtra(Intent.EXTRA_SUBJECT, "Export Facturix")
                                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                     }
                                     context.startActivity(
-                                        Intent.createChooser(send, "Partager l'export")
+                                        Intent.createChooser(send, shareTitle)
                                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                                     )
                                 },
@@ -135,13 +135,13 @@ fun ExportScreen(
                             ) {
                                 Icon(Icons.Default.Share, contentDescription = null)
                                 Spacer(Modifier.padding(end = 8.dp))
-                                Text("Partager / Envoyer par mail")
+                                Text(shareTitle)
                             }
                             Spacer(Modifier.height(8.dp))
                             OutlinedButton(
                                 onClick = { vm.reset() },
                                 modifier = Modifier.fillMaxWidth(),
-                            ) { Text("Nouvel export") }
+                            ) { Text(stringResource(R.string.export_new)) }
                         }
                     }
                 }
@@ -151,7 +151,7 @@ fun ExportScreen(
                     ) {
                         Column(Modifier.padding(20.dp)) {
                             Text(
-                                "Export impossible",
+                                stringResource(R.string.export_error_title),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onErrorContainer,
                             )
@@ -164,7 +164,7 @@ fun ExportScreen(
                             Button(
                                 onClick = { vm.reset() },
                                 modifier = Modifier.fillMaxWidth(),
-                            ) { Text("Réessayer") }
+                            ) { Text(stringResource(R.string.action_retry)) }
                         }
                     }
                 }
@@ -178,13 +178,13 @@ private fun Intro() {
     Card {
         Column(Modifier.padding(16.dp)) {
             Text(
-                "Export pour comptable",
+                stringResource(R.string.export_intro_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                "Génère un fichier CSV avec toutes vos factures (numéro, client, dates, HT, TVA, TTC, mode de paiement). Format compatible avec votre ancien outil.",
+                stringResource(R.string.export_intro_body),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
