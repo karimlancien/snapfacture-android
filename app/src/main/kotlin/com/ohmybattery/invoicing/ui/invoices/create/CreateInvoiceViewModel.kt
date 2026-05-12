@@ -35,6 +35,7 @@ data class CreateUiState(
     val clientAddress: String = "",
     val vehicleModel: String = "",
     val vehicleRegistration: String = "",
+    val comment: String = "",
     val matchingClients: List<ClientEntity> = emptyList(),
     val selectedClient: ClientEntity? = null,
     val cart: List<CartLine> = emptyList(),
@@ -104,6 +105,7 @@ class CreateInvoiceViewModel @Inject constructor(
     fun onVehicleModelChange(s: String) = _state.update { it.copy(vehicleModel = s) }
     fun onVehicleRegistrationChange(s: String) =
         _state.update { it.copy(vehicleRegistration = s.uppercase()) }
+    fun onCommentChange(s: String) = _state.update { it.copy(comment = s) }
 
     fun addBattery(b: BatteryEntity) {
         _state.update { st ->
@@ -168,6 +170,7 @@ class CreateInvoiceViewModel @Inject constructor(
                         issuerName = "Jubs",
                         vehicleModel = st.vehicleModel.ifBlank { null },
                         vehicleRegistration = st.vehicleRegistration.ifBlank { null },
+                        comment = st.comment.ifBlank { null },
                     )
                 )
                 val company = companyRepo.get() ?: error("Company missing")

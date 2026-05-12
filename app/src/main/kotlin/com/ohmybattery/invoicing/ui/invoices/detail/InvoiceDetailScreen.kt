@@ -162,7 +162,11 @@ fun InvoiceDetailScreen(
                             Spacer(Modifier.height(4.dp))
                             Text("Motif : $it", color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
-                    }
+                        inv.invoice.comment?.takeIf { it.isNotBlank() }?.let {
+                            Spacer(Modifier.height(4.dp))
+                            Text("Commentaire : $it", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+}
                 }
             }
             item {

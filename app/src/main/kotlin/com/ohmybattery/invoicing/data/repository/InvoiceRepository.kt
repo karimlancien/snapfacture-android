@@ -36,6 +36,7 @@ data class IssueInvoiceInput(
     val issuerName: String,
     val vehicleModel: String? = null,
     val vehicleRegistration: String? = null,
+    val comment: String? = null,
 )
 
 @Singleton
@@ -100,6 +101,7 @@ class InvoiceRepository @Inject constructor(
             issuerName = input.issuerName,
             vehicleModel = input.vehicleModel?.takeIf { it.isNotBlank() },
             vehicleRegistration = input.vehicleRegistration?.takeIf { it.isNotBlank() },
+            comment = input.comment?.takeIf { it.isNotBlank() },
         )
         val invoiceId = invoiceDao.insertInvoice(invoice)
 

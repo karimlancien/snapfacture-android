@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
@@ -102,6 +103,7 @@ fun CreateInvoiceScreen(
             item { CatalogGrid(catalog, state, vm::addBattery, vm::decrement) }
             if (state.hasInstallLine) item { DeliveryCard(state, vm) }
             if (state.cart.isNotEmpty()) item { CartSummary(state) }
+            if (state.cart.isNotEmpty()) item { CommentCard(state, vm) }
             state.error?.let { item { ErrorBanner(it) } }
         }
     }
@@ -347,6 +349,27 @@ private fun TotalRow(label: String, cents: Long, big: Boolean = false) {
             color = if (big) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             fontWeight = if (big) FontWeight.Bold else FontWeight.Normal,
         )
+    }
+}
+
+@Composable
+private fun CommentCard(state: CreateUiState, vm: CreateInvoiceViewModel) {
+    Card {
+        Column(Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Notes, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.size(8.dp))
+                Text("Commentaire", style = MaterialTheme.typography.titleMedium)
+            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = state.comment,
+                onValueChange = vm::onCommentChange,
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Particularités, notes internes (optionnel)") },
+                maxLines = 3,
+            )
+        }
     }
 }
 

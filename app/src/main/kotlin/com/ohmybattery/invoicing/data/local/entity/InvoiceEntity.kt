@@ -44,5 +44,6 @@ data class InvoiceEntity(
     val vehicleRegistration: String? = null,
     val type: InvoiceType = InvoiceType.INVOICE,
     val linkedInvoiceId: Long? = null,
+    val comment: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
 )

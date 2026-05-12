@@ -46,6 +46,7 @@ class InvoicePdfGenerator @Inject constructor(
         cursor = drawClientBlock(canvas, invoice, cursor)
         cursor = drawInvoiceMetaBlock(canvas, invoice, cursor)
         cursor = drawLinesTable(canvas, invoice, cursor + 24f)
+        cursor = drawComment(canvas, invoice, cursor + 8f)
         cursor = drawTotalsCard(canvas, invoice, cursor + 16f)
         drawPaidStamp(canvas, invoice, cursor + 18f)
         drawFooter(canvas, company)
@@ -255,6 +256,53 @@ class InvoicePdfGenerator @Inject constructor(
             canvas.drawLine(MARGIN, y, PAGE_W - MARGIN, y, divider)
         }
         return y
+    }
+
+    private fun drawComment(canvas: android.graphics.Canvas, inv: InvoiceWithDetails, top: Float): Float {
+        val comment = inv.invoice.comment?.takeIf { it.isNotBlank() } ?: return top
+        val label = Paint().apply {
+            color = MUTED
+            textSize = 9f
+            isAntiAlias = true
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+        }
+        canvas.drawText("COMMENTAIRE", MARGIN, top + 12f, label)
+
+        val body = Paint().apply {
+            color = INK
+            textSize = 11f
+            isAntiAlias = true
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.ITALIC)
+        }
+        val maxWidth = (PAGE_W - 2f * MARGIN - 260f).toInt()
+        val lines = wrapText(comment, body, maxWidth)
+        var y = top + 28f
+        lines.take(4).forEach {
+            canvas.drawText(it, MARGIN, y, body)
+            y += 14f
+        }
+        return y
+    }
+
+    private fun wrapText(text: String, paint: Paint, maxWidthPx: Int): List<String> {
+        val words = text.replace("\n", " \n ").split(' ').filter { it.isNotEmpty() }
+        val out = mutableListOf<String>()
+        var current = StringBuilder()
+        for (word in words) {
+            if (word == "\n") {
+                if (current.isNotEmpty()) { out += current.toString(); current = StringBuilder() }
+                continue
+            }
+            val tentative = if (current.isEmpty()) word else current.toString() + " " + word
+            if (paint.measureText(tentative) <= maxWidthPx) {
+                current = StringBuilder(tentative)
+            } else {
+                if (current.isNotEmpty()) out += current.toString()
+                current = StringBuilder(word)
+            }
+        }
+        if (current.isNotEmpty()) out += current.toString()
+        return out
     }
 
     private fun drawTotalsCard(canvas: android.graphics.Canvas, inv: InvoiceWithDetails, top: Float): Float {
