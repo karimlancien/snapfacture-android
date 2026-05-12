@@ -1,4 +1,4 @@
-package com.ohmyproduct.invoicing.ui.catalog
+package com.ohmybattery.invoicing.ui.catalog
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,8 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.foundation.text.KeyboardOptions
-import com.ohmyproduct.invoicing.core.money.Money
-import com.ohmyproduct.invoicing.data.local.entity.ProductEntity
+import com.ohmybattery.invoicing.core.money.Money
+import com.ohmybattery.invoicing.data.local.entity.ProductEntity
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
