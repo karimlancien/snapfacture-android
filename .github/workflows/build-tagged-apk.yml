@@ -1,0 +1,59 @@
+name: Build tagged APK
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Generate Gradle wrapper
+        run: gradle wrapper --gradle-version=8.10.2 --distribution-type=bin
+
+      - name: Build debug APK
+        shell: bash
+        run: |
+          set -eo pipefail
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Locate and rename APK
+        run: |
+          set -e
+          mkdir -p artifact
+          APK=$(find app/build/outputs/apk/debug -name "*.apk" | head -n 1)
+          cp "$APK" "artifact/ohmybattery-${{ github.ref_name }}.apk"
+          ls -lh artifact/
+
+      - name: Publish frozen GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body: |
+            Build figé du tag ${{ github.ref_name }}.
+            Commit: ${{ github.sha }}
+
+            Cette release ne sera plus modifiée — l'APK reste téléchargeable à vie via le lien stable ci-dessous.
+          files: artifact/*.apk
+          prerelease: false
+          make_latest: false
