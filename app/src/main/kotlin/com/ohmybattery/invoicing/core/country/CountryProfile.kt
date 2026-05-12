@@ -63,7 +63,17 @@ object CountryProfiles {
         else -> FranceProfile
     }
 
-    /** Pick a profile from the device locale at first launch. */
+    /** Map a free-text country (the value users type in CompanyInfo) to a profile. */
+    fun byCountryName(name: String?): CountryProfile {
+        val normalised = name?.trim()?.lowercase().orEmpty()
+        return when (normalised) {
+            "", "fr", "france" -> FranceProfile
+            "us", "usa", "u.s.", "u.s.a.", "united states", "united states of america" -> UsaProfile
+            else -> FranceProfile
+        }
+    }
+
+    /** Pick a profile from the device locale (fallback, used before the company is filled). */
     fun detect(locale: Locale = Locale.getDefault()): CountryProfile =
         when (locale.country.uppercase()) {
             "US" -> UsaProfile

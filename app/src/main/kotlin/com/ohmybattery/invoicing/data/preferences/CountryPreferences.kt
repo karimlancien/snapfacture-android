@@ -6,9 +6,10 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import com.ohmybattery.invoicing.core.country.CountryProfile
 import com.ohmybattery.invoicing.core.country.CountryProfiles
+import com.ohmybattery.invoicing.data.local.dao.CompanyDao
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,12 +23,19 @@ data class CountrySettings(
 @Singleton
 class CountryPreferences @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val companyDao: CompanyDao,
 ) {
     private val keyTaxOptedOut = booleanPreferencesKey("tax_opted_out")
 
-    val flow: Flow<CountrySettings> = context.countryDataStore.data.map { prefs ->
+    val flow: Flow<CountrySettings> = combine(
+        context.countryDataStore.data,
+        companyDao.observe(),
+    ) { prefs, company ->
+        val profile = company?.country
+            ?.let { CountryProfiles.byCountryName(it) }
+            ?: CountryProfiles.detect()
         CountrySettings(
-            profile = CountryProfiles.detect(),
+            profile = profile,
             taxOptedOut = prefs[keyTaxOptedOut] ?: false,
         )
     }
