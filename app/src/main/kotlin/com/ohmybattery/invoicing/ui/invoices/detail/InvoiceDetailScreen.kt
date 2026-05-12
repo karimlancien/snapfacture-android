@@ -205,7 +205,14 @@ fun InvoiceDetailScreen(
                     Button(
                         onClick = {
                             val file = state.pdfFile ?: return@Button
-                            context.startActivity(ShareInvoice.intent(context, file, inv.invoice.number))
+                            context.startActivity(
+                                ShareInvoice.intent(
+                                    context = context,
+                                    file = file,
+                                    invoiceNumber = inv.invoice.number,
+                                    recipientEmail = inv.client.email,
+                                ),
+                            )
                         },
                         enabled = state.pdfFile != null,
                         modifier = Modifier.weight(1f).height(52.dp),

@@ -31,6 +31,7 @@ data class CartLine(
 data class CreateUiState(
     val clientName: String = "",
     val clientPhone: String = "",
+    val clientEmail: String = "",
     val clientAddress: String = "",
     val vehicleModel: String = "",
     val vehicleRegistration: String = "",
@@ -90,6 +91,7 @@ class CreateInvoiceViewModel @Inject constructor(
                 selectedClient = c,
                 clientName = c.name,
                 clientPhone = c.phone.orEmpty(),
+                clientEmail = c.email.orEmpty(),
                 clientAddress = c.addressLine.orEmpty(),
                 matchingClients = emptyList(),
             )
@@ -97,6 +99,7 @@ class CreateInvoiceViewModel @Inject constructor(
     }
 
     fun onPhoneChange(phone: String) = _state.update { it.copy(clientPhone = phone) }
+    fun onEmailChange(email: String) = _state.update { it.copy(clientEmail = email.trim()) }
     fun onAddressChange(addr: String) = _state.update { it.copy(clientAddress = addr) }
     fun onVehicleModelChange(s: String) = _state.update { it.copy(vehicleModel = s) }
     fun onVehicleRegistrationChange(s: String) =
@@ -139,6 +142,7 @@ class CreateInvoiceViewModel @Inject constructor(
                 val clientId = clientRepo.upsertByName(
                     name = st.selectedClient?.name ?: st.clientName,
                     phone = st.clientPhone,
+                    email = st.clientEmail,
                     addressLine = st.clientAddress,
                 )
 

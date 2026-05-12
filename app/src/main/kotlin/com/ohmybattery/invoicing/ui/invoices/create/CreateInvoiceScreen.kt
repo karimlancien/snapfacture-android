@@ -162,6 +162,14 @@ private fun DeliveryCard(state: CreateUiState, vm: CreateInvoiceViewModel) {
             )
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
+                value = state.clientEmail,
+                onValueChange = vm::onEmailChange,
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Email (pour envoi auto de la facture)") },
+                singleLine = true,
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
                 value = state.clientAddress,
                 onValueChange = vm::onAddressChange,
                 modifier = Modifier.fillMaxWidth(),

@@ -22,6 +22,7 @@ class ClientRepository @Inject constructor(private val dao: ClientDao) {
     suspend fun upsertByName(
         name: String,
         phone: String? = null,
+        email: String? = null,
         addressLine: String? = null,
     ): Long {
         val trimmedName = name.trim()
@@ -31,12 +32,14 @@ class ClientRepository @Inject constructor(private val dao: ClientDao) {
                 ClientEntity(
                     name = trimmedName,
                     phone = phone?.takeIf { it.isNotBlank() },
+                    email = email?.takeIf { it.isNotBlank() },
                     addressLine = addressLine?.takeIf { it.isNotBlank() },
                 )
             )
         }
         val merged = existing.copy(
             phone = phone?.takeIf { it.isNotBlank() } ?: existing.phone,
+            email = email?.takeIf { it.isNotBlank() } ?: existing.email,
             addressLine = addressLine?.takeIf { it.isNotBlank() } ?: existing.addressLine,
         )
         if (merged != existing) dao.update(merged)
