@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ohmybattery.invoicing.data.local.entity.InvoiceType
 import com.ohmybattery.invoicing.data.local.relation.InvoiceWithDetails
+import com.ohmybattery.invoicing.data.repository.CompanyRepository
 import com.ohmybattery.invoicing.data.repository.InvoiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +23,7 @@ data class InvoiceListUiState(
     val creditedInvoiceIds: Set<Long> = emptySet(),
     val periodRevenueCents: Long = 0L,
     val periodInvoiceCount: Int = 0,
+    val companyName: String = "Ohmybattery",
     val query: String = "",
     val period: Period = Period.Month,
     val descending: Boolean = true,
@@ -30,6 +32,7 @@ data class InvoiceListUiState(
 @HiltViewModel
 class InvoiceListViewModel @Inject constructor(
     repo: InvoiceRepository,
+    companyRepo: CompanyRepository,
 ) : ViewModel() {
 
     private val monthStart: Long = startOfMonthMillis()
@@ -44,7 +47,7 @@ class InvoiceListViewModel @Inject constructor(
     )
 
     val state: StateFlow<InvoiceListUiState> =
-        combine(repo.observeAll(), filters) { all, f ->
+        combine(repo.observeAll(), filters, companyRepo.observe()) { all, f, company ->
             val creditedIds = all
                 .filter { it.invoice.type == InvoiceType.CREDIT_NOTE }
                 .mapNotNull { it.invoice.linkedInvoiceId }
@@ -62,6 +65,7 @@ class InvoiceListViewModel @Inject constructor(
                 creditedInvoiceIds = creditedIds,
                 periodRevenueCents = revenue,
                 periodInvoiceCount = invoiceCount,
+                companyName = company?.name?.takeIf { it.isNotBlank() } ?: "Ohmybattery",
                 query = f.query,
                 period = f.period,
                 descending = f.descending,

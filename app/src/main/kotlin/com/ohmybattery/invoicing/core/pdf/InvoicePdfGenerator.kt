@@ -49,7 +49,7 @@ class InvoicePdfGenerator @Inject constructor(
         cursor = drawComment(canvas, invoice, cursor + 8f)
         cursor = drawTotalsCard(canvas, invoice, cursor + 16f)
         drawPaidStamp(canvas, invoice, cursor + 18f)
-        drawFooter(canvas, company)
+        drawFooter(canvas, company, invoice)
 
         pdf.finishPage(page)
 
@@ -77,22 +77,28 @@ class InvoicePdfGenerator @Inject constructor(
         val accentPaint = Paint().apply { color = accentColor }
         canvas.drawRect(0f, 150f, PAGE_W.toFloat(), 156f, accentPaint)
 
+        val legalName = inv.invoice.companyNameAtIssue ?: company.name
+        val legalAddress = inv.invoice.companyAddressAtIssue ?: company.addressLine
+        val legalPostal = inv.invoice.companyPostalAtIssue ?: company.postalCode
+        val legalCity = inv.invoice.companyCityAtIssue ?: company.city
+        val legalSiren = inv.invoice.companySirenAtIssue ?: company.siren
+
         val title = Paint().apply {
             color = Color.WHITE
             textSize = 34f
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
             isAntiAlias = true
         }
-        canvas.drawText(company.name.uppercase(Locale.FRANCE), MARGIN, 70f, title)
+        canvas.drawText(legalName.uppercase(Locale.FRANCE), MARGIN, 70f, title)
 
         val sub = Paint().apply {
             color = Color.WHITE
             textSize = 12f
             isAntiAlias = true
         }
-        canvas.drawText("${company.addressLine}, ${company.postalCode} ${company.city}", MARGIN, 92f, sub)
+        canvas.drawText("$legalAddress, $legalPostal $legalCity", MARGIN, 92f, sub)
         canvas.drawText("Tél. ${company.phone}  •  ${company.email}  •  ${company.website}", MARGIN, 110f, sub)
-        canvas.drawText("SIREN ${company.siren}", MARGIN, 128f, sub)
+        canvas.drawText("SIREN $legalSiren", MARGIN, 128f, sub)
 
         val docLabel = Paint().apply {
             color = Color.WHITE
@@ -361,20 +367,27 @@ class InvoicePdfGenerator @Inject constructor(
         canvas.drawText(stamp, MARGIN + 14f, top + 23f, label)
     }
 
-    private fun drawFooter(canvas: android.graphics.Canvas, company: CompanyEntity) {
+    private fun drawFooter(canvas: android.graphics.Canvas, company: CompanyEntity, inv: InvoiceWithDetails) {
+        val legalName = inv.invoice.companyNameAtIssue ?: company.name
+        val legalSiren = inv.invoice.companySirenAtIssue ?: company.siren
+        val legalAddress = inv.invoice.companyAddressAtIssue ?: company.addressLine
+        val legalPostal = inv.invoice.companyPostalAtIssue ?: company.postalCode
+        val legalCity = inv.invoice.companyCityAtIssue ?: company.city
+        val legalManager = inv.invoice.companyManagerAtIssue ?: company.managerName
+
         val divider = Paint().apply { color = DIVIDER; strokeWidth = 0.8f }
         canvas.drawLine(MARGIN, PAGE_H - 90f, PAGE_W - MARGIN, PAGE_H - 90f, divider)
 
         val small = Paint().apply { color = MUTED; textSize = 9f; isAntiAlias = true }
-        canvas.drawText("${company.name} — SIREN ${company.siren}", MARGIN, PAGE_H - 70f, small)
-        canvas.drawText("${company.addressLine}, ${company.postalCode} ${company.city}, ${company.country}", MARGIN, PAGE_H - 58f, small)
+        canvas.drawText("$legalName — SIREN $legalSiren", MARGIN, PAGE_H - 70f, small)
+        canvas.drawText("$legalAddress, $legalPostal $legalCity, ${company.country}", MARGIN, PAGE_H - 58f, small)
         canvas.drawText("Tél. ${company.phone}  •  ${company.email}  •  ${company.website}", MARGIN, PAGE_H - 46f, small)
         canvas.drawText("TVA non applicable, art. 293 B du CGI — sauf option contraire", MARGIN, PAGE_H - 32f, small)
 
         val signature = Paint().apply {
             color = MUTED; textSize = 10f; isAntiAlias = true; textAlign = Paint.Align.RIGHT
         }
-        canvas.drawText("${company.managerName} • Gérant", PAGE_W - MARGIN, PAGE_H - 46f, signature)
+        canvas.drawText("$legalManager • Gérant", PAGE_W - MARGIN, PAGE_H - 46f, signature)
     }
 
     private fun paymentLabel(method: PaymentMethod): String = when (method) {

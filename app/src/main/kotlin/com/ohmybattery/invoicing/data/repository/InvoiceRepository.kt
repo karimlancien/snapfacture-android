@@ -85,6 +85,7 @@ class InvoiceRepository @Inject constructor(
 
         val number = companyDao.peekNextInvoiceNumber()
         companyDao.bumpInvoiceNumber()
+        val company = companyDao.get()
 
         val invoice = InvoiceEntity(
             number = number,
@@ -102,6 +103,13 @@ class InvoiceRepository @Inject constructor(
             vehicleModel = input.vehicleModel?.takeIf { it.isNotBlank() },
             vehicleRegistration = input.vehicleRegistration?.takeIf { it.isNotBlank() },
             comment = input.comment?.takeIf { it.isNotBlank() },
+            companyNameAtIssue = company?.name,
+            companySirenAtIssue = company?.siren,
+            companyAddressAtIssue = company?.addressLine,
+            companyPostalAtIssue = company?.postalCode,
+            companyCityAtIssue = company?.city,
+            companyVatNumberAtIssue = company?.vatNumber,
+            companyManagerAtIssue = company?.managerName,
         )
         val invoiceId = invoiceDao.insertInvoice(invoice)
 
@@ -141,6 +149,7 @@ class InvoiceRepository @Inject constructor(
         val number = companyDao.peekNextInvoiceNumber()
         companyDao.bumpInvoiceNumber()
         val now = System.currentTimeMillis()
+        val company = companyDao.get()
 
         val credit = InvoiceEntity(
             number = number,
@@ -160,6 +169,13 @@ class InvoiceRepository @Inject constructor(
             vehicleRegistration = orig.invoice.vehicleRegistration,
             type = InvoiceType.CREDIT_NOTE,
             linkedInvoiceId = originalId,
+            companyNameAtIssue = company?.name,
+            companySirenAtIssue = company?.siren,
+            companyAddressAtIssue = company?.addressLine,
+            companyPostalAtIssue = company?.postalCode,
+            companyCityAtIssue = company?.city,
+            companyVatNumberAtIssue = company?.vatNumber,
+            companyManagerAtIssue = company?.managerName,
         )
         val newId = invoiceDao.insertInvoice(credit)
 

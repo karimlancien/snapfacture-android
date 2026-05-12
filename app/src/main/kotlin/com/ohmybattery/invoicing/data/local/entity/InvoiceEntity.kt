@@ -45,5 +45,12 @@ data class InvoiceEntity(
     val type: InvoiceType = InvoiceType.INVOICE,
     val linkedInvoiceId: Long? = null,
     val comment: String? = null,
+    val companyNameAtIssue: String? = null,
+    val companySirenAtIssue: String? = null,
+    val companyAddressAtIssue: String? = null,
+    val companyPostalAtIssue: String? = null,
+    val companyCityAtIssue: String? = null,
+    val companyVatNumberAtIssue: String? = null,
+    val companyManagerAtIssue: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
 )

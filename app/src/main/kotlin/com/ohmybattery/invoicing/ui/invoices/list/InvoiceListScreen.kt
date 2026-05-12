@@ -57,7 +57,7 @@ fun InvoiceListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Ohmybattery") },
+                title = { Text(state.companyName) },
                 actions = {
                     IconButton(onClick = onSettings) {
                         Icon(Icons.Default.Settings, contentDescription = "Réglages")
