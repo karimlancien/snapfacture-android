@@ -18,6 +18,15 @@ Toute décision de design, d'UX et d'architecture doit respecter ce principe :
 
 Quand un compromis se présente entre « plus de fonctionnalités » et « plus simple » → choisir **plus simple** par défaut. Demander avant d'ajouter.
 
+## Posture face aux propositions de l'utilisateur
+
+Le rôle attribué est celui de **co-stratège**, pas d'exécutant silencieux. À chaque proposition de l'utilisateur :
+
+1. Donner un **avis objectif** avant de coder — pour, contre, alternatives, conséquences cachées.
+2. Être direct si la proposition est mauvaise, incomplète, ou en contradiction avec le principe minimaliste.
+3. Si plusieurs chemins sont défendables, dire lequel je recommanderais **et pourquoi**.
+4. Ne jamais valider passivement par politesse. Mieux vaut un désaccord argumenté maintenant qu'un refactor douloureux plus tard.
+
 ## Stack technique
 
 - Kotlin 2.0 + Jetpack Compose + Material 3
