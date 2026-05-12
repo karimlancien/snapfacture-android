@@ -15,6 +15,7 @@ import com.ohmybattery.invoicing.ui.invoices.create.CreateInvoiceScreen
 import com.ohmybattery.invoicing.ui.invoices.detail.InvoiceDetailScreen
 import com.ohmybattery.invoicing.ui.invoices.list.InvoiceListScreen
 import com.ohmybattery.invoicing.ui.navigation.Routes
+import com.ohmybattery.invoicing.ui.security.SecurityScreen
 import com.ohmybattery.invoicing.ui.settings.SettingsScreen
 
 @Composable
@@ -60,6 +61,7 @@ fun OhmybatteryRoot() {
                 onOpenExport = { nav.navigate(Routes.EXPORT) },
                 onOpenBackup = { nav.navigate(Routes.BACKUP) },
                 onOpenCompany = { nav.navigate(Routes.COMPANY) },
+                onOpenSecurity = { nav.navigate(Routes.SECURITY) },
             )
         }
         composable(Routes.BACKUP) {
@@ -67,6 +69,9 @@ fun OhmybatteryRoot() {
         }
         composable(Routes.COMPANY) {
             CompanyInfoScreen(onBack = { nav.popBackStack() })
+        }
+        composable(Routes.SECURITY) {
+            SecurityScreen(onBack = { nav.popBackStack() })
         }
         composable(Routes.CATALOG) {
             CatalogScreen(onBack = { nav.popBackStack() })

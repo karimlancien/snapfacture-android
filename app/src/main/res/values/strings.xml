@@ -100,6 +100,24 @@
     <string name="settings_backup_subtitle">Copie de la base après chaque facture (Drive, OneDrive...)</string>
     <string name="settings_company_title">Entreprise</string>
     <string name="settings_company_subtitle">Coordonnées, identifiant légal, numéro de facture</string>
+    <string name="settings_security_title">Sécurité</string>
+    <string name="settings_security_subtitle">Verrouiller l\'app par empreinte / PIN du téléphone</string>
+
+    <!-- Security -->
+    <string name="security_title">Sécurité</string>
+    <string name="security_intro_title">Verrouillage à l\'ouverture</string>
+    <string name="security_intro_body">Active une authentification (empreinte digitale, visage, PIN ou schéma du téléphone) à chaque ouverture de l\'app. Indispensable si vous craignez la perte ou le vol de votre téléphone — vos clients et chiffres restent inaccessibles à toute autre personne.</string>
+    <string name="security_toggle_label">Verrouiller l\'app</string>
+    <string name="security_toggle_subtitle">Authentification demandée à chaque ouverture</string>
+    <string name="security_no_auth_available">Aucune empreinte ni PIN configuré sur ce téléphone. Configurez-en un dans les réglages Android puis revenez ici.</string>
+
+    <!-- Lock screen -->
+    <string name="lock_prompt_title">Facturix</string>
+    <string name="lock_prompt_subtitle">Déverrouillez pour accéder à vos factures</string>
+    <string name="lock_locked_title">Application verrouillée</string>
+    <string name="lock_locked_body">Authentifiez-vous pour accéder à vos données.</string>
+    <string name="lock_retry">Réessayer</string>
+    <string name="lock_no_auth_available">Aucune méthode d\'authentification configurée sur ce téléphone.</string>
 
     <!-- Company info -->
     <string name="company_title">Entreprise</string>

@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,6 +45,7 @@ fun SettingsScreen(
     onOpenExport: () -> Unit,
     onOpenBackup: () -> Unit,
     onOpenCompany: () -> Unit,
+    onOpenSecurity: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -105,6 +107,14 @@ fun SettingsScreen(
                     title = stringResource(R.string.settings_company_title),
                     subtitle = stringResource(R.string.settings_company_subtitle),
                     onClick = onOpenCompany,
+                )
+            }
+            item {
+                SettingsCard(
+                    icon = Icons.Default.Lock,
+                    title = stringResource(R.string.settings_security_title),
+                    subtitle = stringResource(R.string.settings_security_subtitle),
+                    onClick = onOpenSecurity,
                 )
             }
         }

@@ -100,6 +100,24 @@
     <string name="settings_backup_subtitle">Database copy after every invoice (Drive, OneDrive...)</string>
     <string name="settings_company_title">Business</string>
     <string name="settings_company_subtitle">Contact details, legal ID, invoice number</string>
+    <string name="settings_security_title">Security</string>
+    <string name="settings_security_subtitle">Lock the app with fingerprint / phone PIN</string>
+
+    <!-- Security -->
+    <string name="security_title">Security</string>
+    <string name="security_intro_title">Lock on open</string>
+    <string name="security_intro_body">Enables authentication (fingerprint, face, phone PIN, or pattern) every time the app is opened. Critical if you worry about losing or having your phone stolen — your customers and figures remain inaccessible to anyone else.</string>
+    <string name="security_toggle_label">Lock the app</string>
+    <string name="security_toggle_subtitle">Authentication required every time the app opens</string>
+    <string name="security_no_auth_available">No fingerprint or PIN configured on this phone. Set one up in Android settings, then come back here.</string>
+
+    <!-- Lock screen -->
+    <string name="lock_prompt_title">Facturix</string>
+    <string name="lock_prompt_subtitle">Unlock to access your invoices</string>
+    <string name="lock_locked_title">Application locked</string>
+    <string name="lock_locked_body">Authenticate to access your data.</string>
+    <string name="lock_retry">Retry</string>
+    <string name="lock_no_auth_available">No authentication method configured on this phone.</string>
 
     <!-- Company info -->
     <string name="company_title">Business</string>
