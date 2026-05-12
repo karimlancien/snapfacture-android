@@ -1,33 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Ohmybattery</string>
-
-    <string name="tab_invoices">Factures</string>
-    <string name="tab_clients">Clients</string>
-    <string name="tab_stats">Stats</string>
-    <string name="tab_settings">Réglages</string>
-
-    <string name="action_new_invoice">Nouvelle facture</string>
-    <string name="action_save">Enregistrer</string>
-    <string name="action_cash">Encaisser espèces</string>
-    <string name="action_share">Partager</string>
-    <string name="action_print">Imprimer</string>
-
-    <string name="label_client">Client</string>
-    <string name="label_client_name">Nom du client</string>
-    <string name="label_phone">Téléphone</string>
-    <string name="label_address">Adresse</string>
-    <string name="label_home_install">Installation à domicile</string>
-    <string name="label_total_ht">Total H.T.</string>
-    <string name="label_vat">TVA 20%</string>
-    <string name="label_total_ttc">Total TTC</string>
-    <string name="label_payment_method">Mode de paiement</string>
-    <string name="label_cash">Espèces</string>
-    <string name="label_transfer">Virement</string>
-    <string name="label_card">Carte</string>
-
-    <string name="empty_invoices">Aucune facture pour le moment.\nAppuyez sur + pour commencer.</string>
-    <string name="empty_clients">Aucun client enregistré.</string>
-
-    <string name="legal_mention_install">Changement de batterie effectué par notre technicien chez le client</string>
+    <string name="app_name">Facturix</string>
 </resources>
