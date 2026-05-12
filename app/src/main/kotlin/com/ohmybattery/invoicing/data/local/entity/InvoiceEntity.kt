@@ -53,5 +53,6 @@ data class InvoiceEntity(
     val companyVatNumberAtIssue: String? = null,
     val companyManagerAtIssue: String? = null,
     val taxOptedOutAtIssue: Boolean? = null,
+    val clientSiretAtIssue: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
 )

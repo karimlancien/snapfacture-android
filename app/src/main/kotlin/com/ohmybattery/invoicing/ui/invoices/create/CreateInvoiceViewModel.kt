@@ -35,6 +35,8 @@ data class CreateUiState(
     val clientPhone: String = "",
     val clientEmail: String = "",
     val clientAddress: String = "",
+    val isPro: Boolean = false,
+    val clientSiret: String = "",
     val vehicleModel: String = "",
     val vehicleRegistration: String = "",
     val comment: String = "",
@@ -108,6 +110,8 @@ class CreateInvoiceViewModel @Inject constructor(
                 clientPhone = c.phone.orEmpty(),
                 clientEmail = c.email.orEmpty(),
                 clientAddress = c.addressLine.orEmpty(),
+                clientSiret = c.siret.orEmpty(),
+                isPro = !c.siret.isNullOrBlank(),
                 matchingClients = emptyList(),
             )
         }
@@ -116,6 +120,11 @@ class CreateInvoiceViewModel @Inject constructor(
     fun onPhoneChange(phone: String) = _state.update { it.copy(clientPhone = phone) }
     fun onEmailChange(email: String) = _state.update { it.copy(clientEmail = email.trim()) }
     fun onAddressChange(addr: String) = _state.update { it.copy(clientAddress = addr) }
+    fun onProToggle() = _state.update {
+        val newIsPro = !it.isPro
+        it.copy(isPro = newIsPro, clientSiret = if (newIsPro) it.clientSiret else "")
+    }
+    fun onSiretChange(s: String) = _state.update { it.copy(clientSiret = s.filter { c -> c.isDigit() }.take(14)) }
     fun onVehicleModelChange(s: String) = _state.update { it.copy(vehicleModel = s) }
     fun onVehicleRegistrationChange(s: String) =
         _state.update { it.copy(vehicleRegistration = s.uppercase()) }
@@ -155,11 +164,13 @@ class CreateInvoiceViewModel @Inject constructor(
         _state.update { it.copy(isSaving = true, error = null) }
         viewModelScope.launch {
             try {
+                val effectiveSiret = if (st.isPro) st.clientSiret else null
                 val clientId = clientRepo.upsertByName(
                     name = st.selectedClient?.name ?: st.clientName,
                     phone = st.clientPhone,
                     email = st.clientEmail,
                     addressLine = st.clientAddress,
+                    siret = effectiveSiret,
                 )
 
                 val now = System.currentTimeMillis()
@@ -186,6 +197,7 @@ class CreateInvoiceViewModel @Inject constructor(
                         vehicleRegistration = st.vehicleRegistration.ifBlank { null },
                         comment = st.comment.ifBlank { null },
                         taxOptedOut = st.taxOptedOut,
+                        clientSiret = effectiveSiret,
                     )
                 )
                 val company = companyRepo.get() ?: error("Company missing")

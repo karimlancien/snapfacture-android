@@ -38,6 +38,7 @@ data class IssueInvoiceInput(
     val vehicleRegistration: String? = null,
     val comment: String? = null,
     val taxOptedOut: Boolean = false,
+    val clientSiret: String? = null,
 )
 
 @Singleton
@@ -113,6 +114,7 @@ class InvoiceRepository @Inject constructor(
             companyVatNumberAtIssue = company?.vatNumber,
             companyManagerAtIssue = company?.managerName,
             taxOptedOutAtIssue = input.taxOptedOut,
+            clientSiretAtIssue = input.clientSiret?.filter { it.isDigit() }?.takeIf { it.isNotBlank() },
         )
         val invoiceId = invoiceDao.insertInvoice(invoice)
 
@@ -180,6 +182,7 @@ class InvoiceRepository @Inject constructor(
             companyVatNumberAtIssue = company?.vatNumber,
             companyManagerAtIssue = company?.managerName,
             taxOptedOutAtIssue = orig.invoice.taxOptedOutAtIssue ?: (orig.invoice.totalVatCents == 0L),
+            clientSiretAtIssue = orig.invoice.clientSiretAtIssue,
         )
         val newId = invoiceDao.insertInvoice(credit)
 

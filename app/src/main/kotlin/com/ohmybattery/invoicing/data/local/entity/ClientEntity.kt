@@ -12,5 +12,6 @@ data class ClientEntity(
     val addressLine: String? = null,
     val postalCode: String? = null,
     val city: String? = null,
+    val siret: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
 )

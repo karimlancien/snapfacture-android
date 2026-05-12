@@ -38,6 +38,8 @@
     <string name="create_title">Nouvelle facture</string>
     <string name="create_client_section">Client</string>
     <string name="create_client_name_hint">Nom du client</string>
+    <string name="create_pro_toggle">Pro</string>
+    <string name="create_siret_hint">SIRET (14 chiffres)</string>
     <string name="create_delivery_section">Coordonnées du service</string>
     <string name="create_phone_required">Téléphone *</string>
     <string name="create_email_hint">Email (pour envoi auto de la facture)</string>
@@ -253,6 +255,9 @@
     <string name="pdf_credit_reference_date_suffix"> du %1$s</string>
     <string name="pdf_footer_manager">%1$s • Gérant</string>
     <string name="pdf_contact_line">Tél. %1$s  •  %2$s  •  %3$s</string>
+    <string name="pdf_client_siret">SIRET %1$s</string>
+    <string name="pdf_b2b_penalties">Pénalités de retard : taux directeur de la BCE majoré de 10 points (art. L441-10 C. com.).</string>
+    <string name="pdf_b2b_recovery">Indemnité forfaitaire pour frais de recouvrement : 40 € (art. D441-5 C. com.).</string>
 
     <!-- Issue confirmation -->
     <string name="confirm_issue_title">Confirmer la facture</string>

@@ -24,8 +24,10 @@ class ClientRepository @Inject constructor(private val dao: ClientDao) {
         phone: String? = null,
         email: String? = null,
         addressLine: String? = null,
+        siret: String? = null,
     ): Long {
         val trimmedName = name.trim()
+        val cleanSiret = siret?.filter { it.isDigit() }?.takeIf { it.isNotBlank() }
         val existing = dao.search(trimmedName).firstOrNull { it.name.equals(trimmedName, ignoreCase = true) }
         if (existing == null) {
             return dao.insert(
@@ -34,6 +36,7 @@ class ClientRepository @Inject constructor(private val dao: ClientDao) {
                     phone = phone?.takeIf { it.isNotBlank() },
                     email = email?.takeIf { it.isNotBlank() },
                     addressLine = addressLine?.takeIf { it.isNotBlank() },
+                    siret = cleanSiret,
                 )
             )
         }
@@ -41,6 +44,7 @@ class ClientRepository @Inject constructor(private val dao: ClientDao) {
             phone = phone?.takeIf { it.isNotBlank() } ?: existing.phone,
             email = email?.takeIf { it.isNotBlank() } ?: existing.email,
             addressLine = addressLine?.takeIf { it.isNotBlank() } ?: existing.addressLine,
+            siret = cleanSiret ?: existing.siret,
         )
         if (merged != existing) dao.update(merged)
         return existing.id

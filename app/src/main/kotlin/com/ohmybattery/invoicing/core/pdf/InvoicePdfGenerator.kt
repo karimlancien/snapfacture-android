@@ -54,6 +54,7 @@ class InvoicePdfGenerator @Inject constructor(
         cursor = drawComment(canvas, invoice, cursor + 8f)
         cursor = drawTotalsCard(canvas, invoice, cursor + 16f)
         drawPaidStamp(canvas, invoice, cursor + 18f)
+        drawB2bMentions(canvas, invoice)
         drawFooter(canvas, company, invoice, country, taxOptedOut)
 
         pdf.finishPage(page)
@@ -182,7 +183,11 @@ class InvoicePdfGenerator @Inject constructor(
 
         val sub = Paint().apply { color = INK; textSize = 11f; isAntiAlias = true }
         var y = top + 40f
+        val siretLine = inv.invoice.clientSiretAtIssue?.takeIf { it.isNotBlank() }?.let {
+            context.getString(R.string.pdf_client_siret, it)
+        }
         listOfNotNull(
+            siretLine,
             inv.client.addressLine,
             listOfNotNull(inv.client.postalCode, inv.client.city)
                 .filter { it.isNotBlank() }
@@ -417,6 +422,18 @@ class InvoicePdfGenerator @Inject constructor(
             paymentLabel(inv.invoice.paymentMethod),
         )
         canvas.drawText(stamp, MARGIN + 14f, top + 23f, label)
+    }
+
+    private fun drawB2bMentions(canvas: android.graphics.Canvas, inv: InvoiceWithDetails) {
+        if (inv.invoice.clientSiretAtIssue.isNullOrBlank()) return
+        val small = Paint().apply {
+            color = MUTED
+            textSize = 8.5f
+            isAntiAlias = true
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.ITALIC)
+        }
+        canvas.drawText(context.getString(R.string.pdf_b2b_penalties), MARGIN, PAGE_H - 116f, small)
+        canvas.drawText(context.getString(R.string.pdf_b2b_recovery), MARGIN, PAGE_H - 104f, small)
     }
 
     private fun drawFooter(

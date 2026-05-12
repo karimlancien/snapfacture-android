@@ -178,10 +178,22 @@ private fun ConfirmIssueDialog(
 private fun ClientCard(state: CreateUiState, vm: CreateInvoiceViewModel) {
     Card {
         Column(Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Spacer(Modifier.size(8.dp))
-                Text(stringResource(R.string.create_client_section), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    stringResource(R.string.create_client_section),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f),
+                )
+                FilterChip(
+                    selected = state.isPro,
+                    onClick = { vm.onProToggle() },
+                    label = { Text(stringResource(R.string.create_pro_toggle)) },
+                )
             }
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
@@ -191,6 +203,16 @@ private fun ClientCard(state: CreateUiState, vm: CreateInvoiceViewModel) {
                 placeholder = { Text(stringResource(R.string.create_client_name_hint)) },
                 singleLine = true,
             )
+            if (state.isPro) {
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = state.clientSiret,
+                    onValueChange = vm::onSiretChange,
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text(stringResource(R.string.create_siret_hint)) },
+                    singleLine = true,
+                )
+            }
             if (state.matchingClients.isNotEmpty()) {
                 Spacer(Modifier.height(8.dp))
                 state.matchingClients.forEach { c ->
