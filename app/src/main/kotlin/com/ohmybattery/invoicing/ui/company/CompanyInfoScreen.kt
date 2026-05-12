@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ohmybattery.invoicing.R
+import com.ohmybattery.invoicing.core.country.CountryProfiles
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,6 +55,7 @@ fun CompanyInfoScreen(
     var address by remember { mutableStateOf("") }
     var postal by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
+    var countryCode by remember { mutableStateOf("FR") }
     var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var website by remember { mutableStateOf("") }
@@ -63,6 +66,10 @@ fun CompanyInfoScreen(
         company?.let {
             name = it.name; siren = it.siren
             address = it.addressLine; postal = it.postalCode; city = it.city
+            countryCode = when (it.country.trim().lowercase()) {
+                "us", "usa", "united states", "united states of america" -> "US"
+                else -> "FR"
+            }
             phone = it.phone; email = it.email; website = it.website
             manager = it.managerName
             nextNumber = it.nextInvoiceNumber.toString()
@@ -97,9 +104,21 @@ fun CompanyInfoScreen(
         ) {
             item { OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(stringResource(R.string.company_name)) }, modifier = Modifier.fillMaxWidth()) }
             item {
-                val countrySettings = country
-                val legalIdLabel = countrySettings?.profile?.legalIdLabel
-                    ?: stringResource(R.string.company_legal_id)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                    FilterChip(
+                        selected = countryCode == "FR",
+                        onClick = { countryCode = "FR" },
+                        label = { Text(stringResource(R.string.country_france)) },
+                    )
+                    FilterChip(
+                        selected = countryCode == "US",
+                        onClick = { countryCode = "US" },
+                        label = { Text(stringResource(R.string.country_us)) },
+                    )
+                }
+            }
+            item {
+                val legalIdLabel = CountryProfiles.byCode(countryCode).legalIdLabel
                 OutlinedTextField(value = siren, onValueChange = { siren = it }, label = { Text(legalIdLabel) }, modifier = Modifier.fillMaxWidth())
             }
             item { OutlinedTextField(value = address, onValueChange = { address = it }, label = { Text(stringResource(R.string.company_address)) }, modifier = Modifier.fillMaxWidth()) }
@@ -158,6 +177,7 @@ fun CompanyInfoScreen(
                             current.copy(
                                 name = name, siren = siren,
                                 addressLine = address, postalCode = postal, city = city,
+                                country = if (countryCode == "US") "United States" else "France",
                                 phone = phone, email = email, website = website,
                                 managerName = manager,
                                 nextInvoiceNumber = nextNumber.toIntOrNull() ?: current.nextInvoiceNumber,

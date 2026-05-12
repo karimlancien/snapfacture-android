@@ -1,6 +1,14 @@
 package com.ohmybattery.invoicing.ui
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,11 +26,30 @@ import com.ohmybattery.invoicing.ui.navigation.Routes
 import com.ohmybattery.invoicing.ui.security.SecurityScreen
 import com.ohmybattery.invoicing.ui.settings.SettingsScreen
 import com.ohmybattery.invoicing.ui.stats.StatsScreen
+import com.ohmybattery.invoicing.ui.welcome.WelcomeScreen
 
 @Composable
-fun OhmybatteryRoot() {
+fun OhmybatteryRoot(vm: StartupViewModel = hiltViewModel()) {
+    val needsOnboarding by vm.needsOnboarding.collectAsStateWithLifecycle()
+    val resolved = needsOnboarding
+    if (resolved == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
     val nav = rememberNavController()
-    NavHost(navController = nav, startDestination = Routes.INVOICES) {
+    val start = if (resolved) Routes.WELCOME else Routes.INVOICES
+    NavHost(navController = nav, startDestination = start) {
+        composable(Routes.WELCOME) {
+            WelcomeScreen(
+                onDone = {
+                    nav.navigate(Routes.INVOICES) {
+                        popUpTo(Routes.WELCOME) { inclusive = true }
+                    }
+                },
+            )
+        }
         composable(Routes.INVOICES) {
             InvoiceListScreen(
                 onCreate = { nav.navigate(Routes.CREATE) },

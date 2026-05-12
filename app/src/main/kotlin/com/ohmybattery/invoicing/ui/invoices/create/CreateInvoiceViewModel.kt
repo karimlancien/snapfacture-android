@@ -185,6 +185,7 @@ class CreateInvoiceViewModel @Inject constructor(
                         vatRatePermille = line.product.vatRatePermille,
                     )
                 }
+                val company = companyRepo.get() ?: error("Company missing")
                 val invoiceId = invoiceRepo.issue(
                     IssueInvoiceInput(
                         clientId = clientId,
@@ -192,7 +193,7 @@ class CreateInvoiceViewModel @Inject constructor(
                         paymentMethod = st.paymentMethod,
                         issueDateMillis = now,
                         deliveryDateMillis = if (lines.any { it.extraNote != null }) now else null,
-                        issuerName = "Jubs",
+                        issuerName = company.managerName.ifBlank { company.name },
                         vehicleModel = st.vehicleModel.ifBlank { null },
                         vehicleRegistration = st.vehicleRegistration.ifBlank { null },
                         comment = st.comment.ifBlank { null },
@@ -200,7 +201,6 @@ class CreateInvoiceViewModel @Inject constructor(
                         clientSiret = effectiveSiret,
                     )
                 )
-                val company = companyRepo.get() ?: error("Company missing")
                 val details = invoiceRepo.get(invoiceId) ?: error("Invoice missing")
                 val countrySettings = countryPrefs.flow.first()
                 val file = pdfGenerator.generate(

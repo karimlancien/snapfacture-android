@@ -1,6 +1,7 @@
 package com.ohmybattery.invoicing.ui.navigation
 
 object Routes {
+    const val WELCOME = "welcome"
     const val INVOICES = "invoices"
     const val CREATE = "invoices/create"
     const val DETAIL = "invoices/{invoiceId}"
