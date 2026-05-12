@@ -228,6 +228,7 @@ class InvoicePdfGenerator @Inject constructor(
     }
 
     private fun drawLinesTable(canvas: android.graphics.Canvas, inv: InvoiceWithDetails, top: Float): Float {
+        val showVat = inv.invoice.totalVatCents != 0L
         val headerPaint = Paint().apply { color = SOFT_BG }
         canvas.drawRect(MARGIN, top, PAGE_W - MARGIN, top + 28f, headerPaint)
 
@@ -239,9 +240,11 @@ class InvoicePdfGenerator @Inject constructor(
         }
         canvas.drawText("DESCRIPTION", MARGIN + 8f, top + 18f, headLabel)
         canvas.drawText("QTÉ", MARGIN + 320f, top + 18f, headLabel.right())
-        canvas.drawText("P.U. HT", MARGIN + 400f, top + 18f, headLabel.right())
-        canvas.drawText("TVA", MARGIN + 460f, top + 18f, headLabel.right())
-        canvas.drawText("TOTAL TTC", PAGE_W - MARGIN - 8f, top + 18f, headLabel.right())
+        canvas.drawText(if (showVat) "P.U. HT" else "P.U.", MARGIN + 400f, top + 18f, headLabel.right())
+        if (showVat) {
+            canvas.drawText("TVA", MARGIN + 460f, top + 18f, headLabel.right())
+        }
+        canvas.drawText(if (showVat) "TOTAL TTC" else "TOTAL", PAGE_W - MARGIN - 8f, top + 18f, headLabel.right())
 
         var y = top + 28f
         val rowDesc = Paint().apply { color = INK; textSize = 12f; isAntiAlias = true }
@@ -260,7 +263,9 @@ class InvoicePdfGenerator @Inject constructor(
             }
             canvas.drawText(l.quantity.toString(), MARGIN + 320f, y + 18f, rowNum)
             canvas.drawText(Money.formatEurPlain(l.unitPriceHtCents), MARGIN + 400f, y + 18f, rowNum)
-            canvas.drawText(Money.formatEurPlain(l.lineVatCents), MARGIN + 460f, y + 18f, rowNum)
+            if (showVat) {
+                canvas.drawText(Money.formatEurPlain(l.lineVatCents), MARGIN + 460f, y + 18f, rowNum)
+            }
             canvas.drawText(Money.formatEurPlain(l.lineTtcCents), PAGE_W - MARGIN - 8f, y + 18f, rowNum)
             y += rowH
             canvas.drawLine(MARGIN, y, PAGE_W - MARGIN, y, divider)
@@ -318,9 +323,10 @@ class InvoicePdfGenerator @Inject constructor(
     private fun drawTotalsCard(canvas: android.graphics.Canvas, inv: InvoiceWithDetails, top: Float): Float {
         val isCredit = inv.invoice.type == InvoiceType.CREDIT_NOTE
         val totalColor = if (isCredit) CREDIT_BAND else BRAND
+        val showVat = inv.invoice.totalVatCents != 0L
         val cardLeft = PAGE_W - MARGIN - 240f
         val cardRight = PAGE_W - MARGIN
-        val cardBottom = top + 92f
+        val cardBottom = top + if (showVat) 92f else 48f
 
         val card = Paint().apply { color = SOFT_BG }
         canvas.drawRoundRect(RectF(cardLeft, top, cardRight, cardBottom), 10f, 10f, card)
@@ -341,17 +347,33 @@ class InvoicePdfGenerator @Inject constructor(
         }
 
         var y = top + 22f
-        canvas.drawText("Sous-total HT", cardLeft + 14f, y, label)
-        canvas.drawText(Money.formatEurPlain(inv.invoice.totalHtCents), cardRight - 14f, y, value)
-        y += 22f
-        canvas.drawText("TVA (20%)", cardLeft + 14f, y, label)
-        canvas.drawText(Money.formatEurPlain(inv.invoice.totalVatCents), cardRight - 14f, y, value)
-        y += 28f
-        val totalText = if (isCredit) "À REMBOURSER" else "TOTAL TTC"
+        if (showVat) {
+            canvas.drawText("Sous-total HT", cardLeft + 14f, y, label)
+            canvas.drawText(Money.formatEurPlain(inv.invoice.totalHtCents), cardRight - 14f, y, value)
+            y += 22f
+            val ratePct = computeVatRatePct(inv.invoice.totalHtCents, inv.invoice.totalVatCents)
+            canvas.drawText("TVA ($ratePct%)", cardLeft + 14f, y, label)
+            canvas.drawText(Money.formatEurPlain(inv.invoice.totalVatCents), cardRight - 14f, y, value)
+            y += 28f
+        }
+        val totalText = when {
+            isCredit -> "À REMBOURSER"
+            showVat -> "TOTAL TTC"
+            else -> "TOTAL"
+        }
         canvas.drawText(totalText, cardLeft + 14f, y, totalLabel)
         canvas.drawText(Money.formatEurPlain(inv.invoice.totalTtcCents), cardRight - 14f, y, totalValue)
 
         return cardBottom
+    }
+
+    private fun computeVatRatePct(htCents: Long, vatCents: Long): String {
+        if (htCents == 0L) return "0"
+        val rate = (vatCents.toDouble() / htCents.toDouble()) * 100.0
+        // Render 20.0 as "20", 5.5 as "5,5"
+        val rounded = Math.round(rate * 10) / 10.0
+        return if (rounded == rounded.toInt().toDouble()) rounded.toInt().toString()
+        else String.format(java.util.Locale.FRANCE, "%.1f", rounded)
     }
 
     private fun drawPaidStamp(canvas: android.graphics.Canvas, inv: InvoiceWithDetails, top: Float) {
@@ -392,7 +414,8 @@ class InvoicePdfGenerator @Inject constructor(
         canvas.drawText("$legalName — ${country.legalIdLabel} $legalSiren", MARGIN, PAGE_H - 70f, small)
         canvas.drawText("$legalAddress, $legalPostal $legalCity, ${company.country}", MARGIN, PAGE_H - 58f, small)
         canvas.drawText("Tél. ${company.phone}  •  ${company.email}  •  ${company.website}", MARGIN, PAGE_H - 46f, small)
-        country.footerMention(taxOptedOut)?.let { mention ->
+        val effectiveTaxOptedOut = inv.invoice.taxOptedOutAtIssue ?: (inv.invoice.totalVatCents == 0L)
+        country.footerMention(effectiveTaxOptedOut)?.let { mention ->
             canvas.drawText(mention, MARGIN, PAGE_H - 32f, small)
         }
 

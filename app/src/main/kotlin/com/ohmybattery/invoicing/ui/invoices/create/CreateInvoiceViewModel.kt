@@ -42,15 +42,18 @@ data class CreateUiState(
     val selectedClient: ClientEntity? = null,
     val cart: List<CartLine> = emptyList(),
     val paymentMethod: PaymentMethod = PaymentMethod.CASH,
+    val taxOptedOut: Boolean = false,
     val isSaving: Boolean = false,
     val error: String? = null,
 ) {
     val totalTtcCents: Long get() = cart.sumOf { it.battery.priceTtcCents * it.quantity }
-    val totalHtCents: Long get() = cart.sumOf {
-        val ht = Money.htFromTtc(it.battery.priceTtcCents, it.battery.vatRatePermille)
-        ht * it.quantity
-    }
-    val totalVatCents: Long get() = totalTtcCents - totalHtCents
+    val totalHtCents: Long get() =
+        if (taxOptedOut) totalTtcCents
+        else cart.sumOf {
+            val ht = Money.htFromTtc(it.battery.priceTtcCents, it.battery.vatRatePermille)
+            ht * it.quantity
+        }
+    val totalVatCents: Long get() = if (taxOptedOut) 0L else totalTtcCents - totalHtCents
 
     val hasInstallLine: Boolean get() = cart.any { it.battery.withInstall }
 
@@ -81,6 +84,14 @@ class CreateInvoiceViewModel @Inject constructor(
 
     val catalog: StateFlow<List<BatteryEntity>> =
         batteryRepo.observeActive().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    init {
+        viewModelScope.launch {
+            countryPrefs.flow.collect { settings ->
+                _state.update { it.copy(taxOptedOut = settings.taxOptedOut) }
+            }
+        }
+    }
 
     fun onClientNameChange(name: String) {
         _state.update { it.copy(clientName = name, selectedClient = null) }
@@ -174,6 +185,7 @@ class CreateInvoiceViewModel @Inject constructor(
                         vehicleModel = st.vehicleModel.ifBlank { null },
                         vehicleRegistration = st.vehicleRegistration.ifBlank { null },
                         comment = st.comment.ifBlank { null },
+                        taxOptedOut = st.taxOptedOut,
                     )
                 )
                 val company = companyRepo.get() ?: error("Company missing")

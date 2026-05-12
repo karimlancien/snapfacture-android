@@ -192,11 +192,24 @@ fun InvoiceDetailScreen(
                         }
                         HorizontalDivider()
                         Spacer(Modifier.height(8.dp))
-                        TotalRow("Total H.T.", inv.invoice.totalHtCents)
-                        TotalRow("TVA (20%)", inv.invoice.totalVatCents)
-                        Spacer(Modifier.height(4.dp))
+                        val hasVat = inv.invoice.totalVatCents != 0L
+                        if (hasVat) {
+                            TotalRow("Total H.T.", inv.invoice.totalHtCents)
+                            val ratePct = if (inv.invoice.totalHtCents != 0L) {
+                                val r = (inv.invoice.totalVatCents.toDouble() / inv.invoice.totalHtCents) * 100
+                                val rounded = Math.round(r * 10) / 10.0
+                                if (rounded == rounded.toInt().toDouble()) rounded.toInt().toString()
+                                else "%.1f".format(rounded).replace('.', ',')
+                            } else "20"
+                            TotalRow("TVA ($ratePct%)", inv.invoice.totalVatCents)
+                            Spacer(Modifier.height(4.dp))
+                        }
                         TotalRow(
-                            if (isCredit) "À rembourser" else "Total TTC",
+                            when {
+                                isCredit -> "À rembourser"
+                                hasVat -> "Total TTC"
+                                else -> "Total"
+                            },
                             inv.invoice.totalTtcCents,
                             big = true,
                             credit = isCredit,

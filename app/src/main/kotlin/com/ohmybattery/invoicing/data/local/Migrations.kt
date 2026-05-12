@@ -60,3 +60,15 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
         )
     }
 }
+
+val MIGRATION_6_7 = object : Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE invoices ADD COLUMN taxOptedOutAtIssue INTEGER")
+        // Backfill from the actual VAT amount stored on the invoice — the only
+        // reliable signal: an invoice with zero VAT was issued under franchise.
+        db.execSQL(
+            "UPDATE invoices SET taxOptedOutAtIssue = CASE " +
+                "WHEN totalVatCents = 0 THEN 1 ELSE 0 END"
+        )
+    }
+}

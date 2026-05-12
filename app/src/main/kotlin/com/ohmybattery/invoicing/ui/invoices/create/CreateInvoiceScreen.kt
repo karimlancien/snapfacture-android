@@ -327,10 +327,14 @@ private fun CartSummary(state: CreateUiState) {
                 Spacer(Modifier.height(4.dp))
             }
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
-            TotalRow("Total H.T.", state.totalHtCents)
-            TotalRow("TVA (20%)", state.totalVatCents)
-            Spacer(Modifier.height(6.dp))
-            TotalRow("Total TTC", state.totalTtcCents, big = true)
+            if (state.totalVatCents != 0L) {
+                TotalRow("Total H.T.", state.totalHtCents)
+                TotalRow("TVA (20%)", state.totalVatCents)
+                Spacer(Modifier.height(6.dp))
+                TotalRow("Total TTC", state.totalTtcCents, big = true)
+            } else {
+                TotalRow("Total", state.totalTtcCents, big = true)
+            }
         }
     }
 }

@@ -37,6 +37,7 @@ data class IssueInvoiceInput(
     val vehicleModel: String? = null,
     val vehicleRegistration: String? = null,
     val comment: String? = null,
+    val taxOptedOut: Boolean = false,
 )
 
 @Singleton
@@ -63,7 +64,8 @@ class InvoiceRepository @Inject constructor(
 
         val computedLines = input.lines.map { l ->
             val ttcUnit = l.unitPriceTtcCents
-            val htUnit = Money.htFromTtc(ttcUnit, l.vatRatePermille)
+            val effectiveRate = if (input.taxOptedOut) 0 else l.vatRatePermille
+            val htUnit = if (input.taxOptedOut) ttcUnit else Money.htFromTtc(ttcUnit, effectiveRate)
             val lineTtc = ttcUnit * l.quantity
             val lineHt = htUnit * l.quantity
             val lineVat = lineTtc - lineHt
@@ -72,7 +74,7 @@ class InvoiceRepository @Inject constructor(
                 extraNote = l.extraNote,
                 quantity = l.quantity,
                 unitHtCents = htUnit,
-                vatRatePermille = l.vatRatePermille,
+                vatRatePermille = effectiveRate,
                 lineHt = lineHt,
                 lineVat = lineVat,
                 lineTtc = lineTtc,
@@ -110,6 +112,7 @@ class InvoiceRepository @Inject constructor(
             companyCityAtIssue = company?.city,
             companyVatNumberAtIssue = company?.vatNumber,
             companyManagerAtIssue = company?.managerName,
+            taxOptedOutAtIssue = input.taxOptedOut,
         )
         val invoiceId = invoiceDao.insertInvoice(invoice)
 
@@ -176,6 +179,7 @@ class InvoiceRepository @Inject constructor(
             companyCityAtIssue = company?.city,
             companyVatNumberAtIssue = company?.vatNumber,
             companyManagerAtIssue = company?.managerName,
+            taxOptedOutAtIssue = orig.invoice.taxOptedOutAtIssue ?: (orig.invoice.totalVatCents == 0L),
         )
         val newId = invoiceDao.insertInvoice(credit)
 

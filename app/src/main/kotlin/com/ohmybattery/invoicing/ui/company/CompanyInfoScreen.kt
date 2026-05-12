@@ -122,9 +122,9 @@ fun CompanyInfoScreen(
                                 )
                                 Text(
                                     if (settings.profile.code == "FR")
-                                        "Auto-entrepreneur sous le seuil — la facture affichera « TVA non applicable, art. 293 B du CGI ». Désactivez si vous facturez avec TVA."
+                                        "À partir de maintenant, les nouvelles factures seront émises sans TVA (mention « art. 293 B du CGI »). Les factures déjà émises restent inchangées."
                                     else
-                                        "Cette entreprise n'applique pas de taxe sur ses ventes.",
+                                        "À partir de maintenant, les nouvelles factures seront émises sans taxe. Les factures déjà émises restent inchangées.",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )

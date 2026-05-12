@@ -136,6 +136,7 @@ class InvoiceCsvImporter @Inject constructor(
                         companyCityAtIssue = companyAtImport?.city,
                         companyVatNumberAtIssue = companyAtImport?.vatNumber,
                         companyManagerAtIssue = companyAtImport?.managerName,
+                        taxOptedOutAtIssue = vatCents == 0L,
                     )
                 )
                 db.invoiceDao().insertLines(
