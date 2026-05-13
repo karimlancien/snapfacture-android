@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ohmybattery.invoicing.R
-import com.ohmybattery.invoicing.core.money.Money
+import com.ohmybattery.invoicing.core.country.LocalCountryProfile
 import com.ohmybattery.invoicing.data.local.entity.PaymentMethod
 import com.ohmybattery.invoicing.data.local.entity.ProductEntity
 
@@ -138,7 +138,7 @@ private fun ConfirmIssueDialog(
         PaymentMethod.OTHER -> stringResource(R.string.create_payment_other)
     }
     val lineCount = state.cart.sumOf { it.quantity }
-    val totalLabel = Money.formatEurPlain(state.totalTtcCents)
+    val totalLabel = LocalCountryProfile.current.formatMoney(state.totalTtcCents)
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.confirm_issue_title)) },
@@ -332,6 +332,7 @@ private fun ProductTile(
     onAdd: (ProductEntity) -> Unit,
     onRemove: (ProductEntity) -> Unit,
 ) {
+    val profile = LocalCountryProfile.current
     val selected = qty > 0
     Card(
         onClick = { onAdd(b) },
@@ -374,7 +375,7 @@ private fun ProductTile(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    Money.formatEurPlain(b.priceTtcCents),
+                    profile.formatMoney(b.priceTtcCents),
                     style = MaterialTheme.typography.titleLarge,
                     color = if (selected) MaterialTheme.colorScheme.onPrimary
                     else MaterialTheme.colorScheme.primary,
@@ -403,6 +404,7 @@ private fun ProductTile(
 
 @Composable
 private fun CartSummary(state: CreateUiState) {
+    val profile = LocalCountryProfile.current
     Card {
         Column(Modifier.padding(16.dp)) {
             Text(stringResource(R.string.create_cart_section), style = MaterialTheme.typography.titleMedium)
@@ -413,7 +415,7 @@ private fun CartSummary(state: CreateUiState) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text("${line.quantity} × ${line.product.label}", Modifier.weight(1f))
-                    Text(Money.formatEurPlain(line.product.priceTtcCents * line.quantity))
+                    Text(profile.formatMoney(line.product.priceTtcCents * line.quantity))
                 }
                 Spacer(Modifier.height(4.dp))
             }
@@ -439,7 +441,7 @@ private fun TotalRow(label: String, cents: Long, big: Boolean = false) {
             color = if (big) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
         )
         Text(
-            Money.formatEurPlain(cents),
+            LocalCountryProfile.current.formatMoney(cents),
             style = if (big) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyMedium,
             color = if (big) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             fontWeight = if (big) FontWeight.Bold else FontWeight.Normal,
@@ -527,7 +529,7 @@ private fun BottomCashBar(
                     )
                 } else {
                     Text(
-                        stringResource(R.string.create_cash_in, Money.formatEurPlain(totalTtc)),
+                        stringResource(R.string.create_cash_in, LocalCountryProfile.current.formatMoney(totalTtc)),
                         style = MaterialTheme.typography.titleMedium,
                     )
                 }

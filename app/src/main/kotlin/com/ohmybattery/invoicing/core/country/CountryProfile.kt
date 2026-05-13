@@ -1,6 +1,9 @@
 package com.ohmybattery.invoicing.core.country
 
+import java.text.NumberFormat
+import java.text.SimpleDateFormat
 import java.util.Currency
+import java.util.Date
 import java.util.Locale
 
 /**
@@ -22,6 +25,18 @@ sealed interface CountryProfile {
 
     /** Optional small-print line drawn at the bottom of every PDF. */
     fun footerMention(taxOptedOut: Boolean): String?
+
+    fun formatMoney(cents: Long): String {
+        val nf = NumberFormat.getCurrencyInstance(locale).apply {
+            currency = this@CountryProfile.currency
+            minimumFractionDigits = 2
+            maximumFractionDigits = 2
+        }
+        return nf.format(cents / 100.0)
+    }
+
+    fun formatDate(millis: Long): String =
+        SimpleDateFormat(dateFormat, locale).format(Date(millis))
 }
 
 object FranceProfile : CountryProfile {

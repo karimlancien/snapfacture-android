@@ -50,13 +50,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ohmybattery.invoicing.R
-import com.ohmybattery.invoicing.core.money.Money
+import com.ohmybattery.invoicing.core.country.LocalCountryProfile
 import com.ohmybattery.invoicing.core.pdf.ShareInvoice
 import com.ohmybattery.invoicing.data.local.entity.InvoiceType
 import com.ohmybattery.invoicing.data.local.entity.PaymentMethod
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -124,7 +121,7 @@ fun InvoiceDetailScreen(
                                     Text(
                                         stringResource(
                                             R.string.detail_credit_source_date,
-                                            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(it)),
+                                            LocalCountryProfile.current.formatDate(it),
                                         ),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onErrorContainer,
@@ -161,13 +158,13 @@ fun InvoiceDetailScreen(
             item {
                 Card {
                     Column(Modifier.padding(16.dp)) {
-                        val df = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        val profile = LocalCountryProfile.current
                         Text(inv.client.name, style = MaterialTheme.typography.titleLarge)
                         Spacer(Modifier.height(4.dp))
                         Text(
                             stringResource(
                                 if (isCredit) R.string.detail_issued_on_m else R.string.detail_issued_on_f,
-                                df.format(Date(inv.invoice.issueDate)),
+                                profile.formatDate(inv.invoice.issueDate),
                             ),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -189,6 +186,7 @@ fun InvoiceDetailScreen(
             item {
                 Card {
                     Column(Modifier.padding(16.dp)) {
+                        val profile = LocalCountryProfile.current
                         Text(stringResource(R.string.detail_lines_section), style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.height(8.dp))
                         inv.lines.sortedBy { it.position }.forEach { l ->
@@ -203,7 +201,7 @@ fun InvoiceDetailScreen(
                                         )
                                     }
                                 }
-                                Text(Money.formatEurPlain(l.lineTtcCents))
+                                Text(profile.formatMoney(l.lineTtcCents))
                             }
                             Spacer(Modifier.height(8.dp))
                         }
@@ -218,7 +216,7 @@ fun InvoiceDetailScreen(
                                 if (rounded == rounded.toInt().toDouble()) rounded.toInt().toString()
                                 else "%.1f".format(rounded).replace('.', ',')
                             } else "20"
-                            TotalRow("TVA ($ratePct%)", inv.invoice.totalVatCents)
+                            TotalRow("${profile.taxLabel} ($ratePct%)", inv.invoice.totalVatCents)
                             Spacer(Modifier.height(4.dp))
                         }
                         TotalRow(
@@ -384,7 +382,7 @@ private fun TotalRow(label: String, cents: Long, big: Boolean = false, credit: B
             fontWeight = if (big) FontWeight.Bold else FontWeight.Normal,
         )
         Text(
-            Money.formatEurPlain(cents),
+            LocalCountryProfile.current.formatMoney(cents),
             style = if (big) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyMedium,
             color = color,
             fontWeight = if (big) FontWeight.Bold else FontWeight.Normal,

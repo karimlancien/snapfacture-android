@@ -98,3 +98,9 @@ val MIGRATION_9_10 = object : Migration(9, 10) {
         db.execSQL("ALTER TABLE invoices ADD COLUMN clientSiretAtIssue TEXT")
     }
 }
+
+val MIGRATION_10_11 = object : Migration(10, 11) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE company ADD COLUMN defaultTaxPermille INTEGER NOT NULL DEFAULT 0")
+    }
+}

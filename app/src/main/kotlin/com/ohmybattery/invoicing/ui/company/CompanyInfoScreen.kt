@@ -61,6 +61,7 @@ fun CompanyInfoScreen(
     var website by remember { mutableStateOf("") }
     var manager by remember { mutableStateOf("") }
     var nextNumber by remember { mutableStateOf("") }
+    var defaultTaxPct by remember { mutableStateOf("") }
 
     LaunchedEffect(company) {
         company?.let {
@@ -73,6 +74,9 @@ fun CompanyInfoScreen(
             phone = it.phone; email = it.email; website = it.website
             manager = it.managerName
             nextNumber = it.nextInvoiceNumber.toString()
+            defaultTaxPct = if (it.defaultTaxPermille > 0)
+                "%.2f".format(it.defaultTaxPermille / 10.0).trimEnd('0').trimEnd('.', ',')
+            else ""
         }
     }
 
@@ -130,6 +134,18 @@ fun CompanyInfoScreen(
             item { OutlinedTextField(value = manager, onValueChange = { manager = it }, label = { Text(stringResource(R.string.company_manager)) }, modifier = Modifier.fillMaxWidth()) }
             item { OutlinedTextField(value = nextNumber, onValueChange = { nextNumber = it }, label = { Text(stringResource(R.string.company_next_invoice_number)) }, modifier = Modifier.fillMaxWidth()) }
 
+            if (countryCode == "US") {
+                item {
+                    OutlinedTextField(
+                        value = defaultTaxPct,
+                        onValueChange = { defaultTaxPct = it.replace(',', '.') },
+                        label = { Text(stringResource(R.string.company_default_sales_tax)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                    )
+                }
+            }
+
             country?.let { settings ->
                 item {
                     Spacer(Modifier.height(4.dp))
@@ -173,6 +189,11 @@ fun CompanyInfoScreen(
                 Button(
                     onClick = {
                         val current = company ?: return@Button
+                        val parsedPermille = defaultTaxPct
+                            .replace(',', '.')
+                            .toDoubleOrNull()
+                            ?.let { Math.round(it * 10.0).toInt() }
+                            ?: 0
                         vm.save(
                             current.copy(
                                 name = name, siren = siren,
@@ -181,6 +202,7 @@ fun CompanyInfoScreen(
                                 phone = phone, email = email, website = website,
                                 managerName = manager,
                                 nextInvoiceNumber = nextNumber.toIntOrNull() ?: current.nextInvoiceNumber,
+                                defaultTaxPermille = if (countryCode == "US") parsedPermille else current.defaultTaxPermille,
                             )
                         )
                         onBack()

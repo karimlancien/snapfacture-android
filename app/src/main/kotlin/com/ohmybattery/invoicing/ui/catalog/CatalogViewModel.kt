@@ -3,10 +3,13 @@ package com.ohmybattery.invoicing.ui.catalog
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ohmybattery.invoicing.data.local.entity.ProductEntity
+import com.ohmybattery.invoicing.data.preferences.CountryPreferences
+import com.ohmybattery.invoicing.data.repository.CompanyRepository
 import com.ohmybattery.invoicing.data.repository.ProductRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -44,10 +47,18 @@ data class CatalogDraft(
 @HiltViewModel
 class CatalogViewModel @Inject constructor(
     private val repo: ProductRepository,
+    private val companyRepo: CompanyRepository,
+    private val countryPrefs: CountryPreferences,
 ) : ViewModel() {
 
     val items: StateFlow<List<ProductEntity>> =
         repo.observeAll().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private suspend fun resolveDefaultTaxPermille(): Int {
+        val companyPermille = companyRepo.get()?.defaultTaxPermille ?: 0
+        if (companyPermille > 0) return companyPermille
+        return countryPrefs.flow.first().profile.defaultTaxRatePermille
+    }
 
     fun save(draft: CatalogDraft, onDone: () -> Unit) {
         val cents = draft.parsedCents ?: return
@@ -58,6 +69,7 @@ class CatalogViewModel @Inject constructor(
                     ProductEntity(
                         label = draft.label.trim(),
                         priceTtcCents = cents,
+                        vatRatePermille = resolveDefaultTaxPermille(),
                         withInstall = draft.withInstall,
                         serviceNote = if (draft.withInstall) note else null,
                         active = draft.active,

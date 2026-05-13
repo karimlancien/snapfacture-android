@@ -206,6 +206,7 @@
     <string name="company_website">Website</string>
     <string name="company_manager">Manager</string>
     <string name="company_next_invoice_number">Next invoice #</string>
+    <string name="company_default_sales_tax">Default sales tax % (e.g. 7.25)</string>
     <string name="company_country_section">Country / tax regime</string>
     <string name="company_tax_regime_section">%1$s regime</string>
     <string name="company_franchise_label">No %1$s</string>

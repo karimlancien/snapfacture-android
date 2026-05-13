@@ -10,15 +10,12 @@ import androidx.core.content.FileProvider
 import com.ohmybattery.invoicing.R
 import com.ohmybattery.invoicing.core.country.CountryProfile
 import com.ohmybattery.invoicing.core.country.FranceProfile
-import com.ohmybattery.invoicing.core.money.Money
 import com.ohmybattery.invoicing.data.local.entity.CompanyEntity
 import com.ohmybattery.invoicing.data.local.entity.InvoiceType
 import com.ohmybattery.invoicing.data.local.entity.PaymentMethod
 import com.ohmybattery.invoicing.data.local.relation.InvoiceWithDetails
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -27,8 +24,6 @@ import javax.inject.Singleton
 class InvoicePdfGenerator @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
-
-    private val dateFmt = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
     fun generate(
         invoice: InvoiceWithDetails,
@@ -46,15 +41,15 @@ class InvoicePdfGenerator @Inject constructor(
         drawHeader(canvas, company, invoice, country)
         var cursor = MARGIN + 230f
         if (invoice.invoice.type == InvoiceType.CREDIT_NOTE && sourceInvoiceNumber != null) {
-            cursor = drawCreditReference(canvas, sourceInvoiceNumber, sourceInvoiceDateMillis, cursor)
+            cursor = drawCreditReference(canvas, sourceInvoiceNumber, sourceInvoiceDateMillis, country, cursor)
         }
         cursor = drawClientBlock(canvas, invoice, cursor)
-        cursor = drawInvoiceMetaBlock(canvas, invoice, cursor)
-        cursor = drawLinesTable(canvas, invoice, cursor + 24f)
+        cursor = drawInvoiceMetaBlock(canvas, invoice, country, cursor)
+        cursor = drawLinesTable(canvas, invoice, country, cursor + 24f)
         cursor = drawComment(canvas, invoice, cursor + 8f)
-        cursor = drawTotalsCard(canvas, invoice, cursor + 16f)
+        cursor = drawTotalsCard(canvas, invoice, country, cursor + 16f)
         drawPaidStamp(canvas, invoice, cursor + 18f)
-        drawB2bMentions(canvas, invoice)
+        drawB2bMentions(canvas, invoice, country)
         drawFooter(canvas, company, invoice, country, taxOptedOut)
 
         pdf.finishPage(page)
@@ -100,7 +95,7 @@ class InvoicePdfGenerator @Inject constructor(
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
             isAntiAlias = true
         }
-        canvas.drawText(legalName.uppercase(Locale.FRANCE), MARGIN, 70f, title)
+        canvas.drawText(legalName.uppercase(country.locale), MARGIN, 70f, title)
 
         val sub = Paint().apply {
             color = Color.WHITE
@@ -132,7 +127,7 @@ class InvoicePdfGenerator @Inject constructor(
         }
         val emission = context.getString(
             if (isCredit) R.string.pdf_issued_on_m else R.string.pdf_issued_on_f,
-            dateFmt.format(Date(inv.invoice.issueDate)),
+            country.formatDate(inv.invoice.issueDate),
         )
         canvas.drawText(emission, PAGE_W - MARGIN, 92f, factureDate)
     }
@@ -141,6 +136,7 @@ class InvoicePdfGenerator @Inject constructor(
         canvas: android.graphics.Canvas,
         sourceNumber: Int,
         sourceDateMillis: Long?,
+        country: CountryProfile,
         top: Float,
     ): Float {
         val tag = Paint().apply { color = CREDIT_BG }
@@ -153,7 +149,7 @@ class InvoicePdfGenerator @Inject constructor(
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
         }
         val dateSuffix = sourceDateMillis?.let {
-            context.getString(R.string.pdf_credit_reference_date_suffix, dateFmt.format(Date(it)))
+            context.getString(R.string.pdf_credit_reference_date_suffix, country.formatDate(it))
         } ?: ""
         canvas.drawText(
             context.getString(R.string.pdf_credit_reference, sourceNumber, dateSuffix),
@@ -219,7 +215,12 @@ class InvoicePdfGenerator @Inject constructor(
         return y
     }
 
-    private fun drawInvoiceMetaBlock(canvas: android.graphics.Canvas, inv: InvoiceWithDetails, top: Float): Float {
+    private fun drawInvoiceMetaBlock(
+        canvas: android.graphics.Canvas,
+        inv: InvoiceWithDetails,
+        country: CountryProfile,
+        top: Float,
+    ): Float {
         val xLabel = PAGE_W - MARGIN - 200f
         val xValue = PAGE_W - MARGIN
 
@@ -231,10 +232,10 @@ class InvoicePdfGenerator @Inject constructor(
         }
 
         val rows = buildList {
-            add(context.getString(R.string.pdf_meta_issue_date) to dateFmt.format(Date(inv.invoice.issueDate)))
-            add(context.getString(R.string.pdf_meta_due_date) to dateFmt.format(Date(inv.invoice.dueDate)))
+            add(context.getString(R.string.pdf_meta_issue_date) to country.formatDate(inv.invoice.issueDate))
+            add(context.getString(R.string.pdf_meta_due_date) to country.formatDate(inv.invoice.dueDate))
             inv.invoice.deliveryDate?.let {
-                add(context.getString(R.string.pdf_meta_delivery_date) to dateFmt.format(Date(it)))
+                add(context.getString(R.string.pdf_meta_delivery_date) to country.formatDate(it))
             }
             add(context.getString(R.string.pdf_meta_payment_method) to paymentLabel(inv.invoice.paymentMethod))
         }
@@ -248,7 +249,12 @@ class InvoicePdfGenerator @Inject constructor(
         return maxOf(top, y)
     }
 
-    private fun drawLinesTable(canvas: android.graphics.Canvas, inv: InvoiceWithDetails, top: Float): Float {
+    private fun drawLinesTable(
+        canvas: android.graphics.Canvas,
+        inv: InvoiceWithDetails,
+        country: CountryProfile,
+        top: Float,
+    ): Float {
         val showVat = inv.invoice.totalVatCents != 0L
         val headerPaint = Paint().apply { color = SOFT_BG }
         canvas.drawRect(MARGIN, top, PAGE_W - MARGIN, top + 28f, headerPaint)
@@ -289,11 +295,11 @@ class InvoicePdfGenerator @Inject constructor(
                 canvas.drawText(it, MARGIN + 8f, y + 33f, rowNote)
             }
             canvas.drawText(l.quantity.toString(), MARGIN + 320f, y + 18f, rowNum)
-            canvas.drawText(Money.formatEurPlain(l.unitPriceHtCents), MARGIN + 400f, y + 18f, rowNum)
+            canvas.drawText(country.formatMoney(l.unitPriceHtCents), MARGIN + 400f, y + 18f, rowNum)
             if (showVat) {
-                canvas.drawText(Money.formatEurPlain(l.lineVatCents), MARGIN + 460f, y + 18f, rowNum)
+                canvas.drawText(country.formatMoney(l.lineVatCents), MARGIN + 460f, y + 18f, rowNum)
             }
-            canvas.drawText(Money.formatEurPlain(l.lineTtcCents), PAGE_W - MARGIN - 8f, y + 18f, rowNum)
+            canvas.drawText(country.formatMoney(l.lineTtcCents), PAGE_W - MARGIN - 8f, y + 18f, rowNum)
             y += rowH
             canvas.drawLine(MARGIN, y, PAGE_W - MARGIN, y, divider)
         }
@@ -347,7 +353,12 @@ class InvoicePdfGenerator @Inject constructor(
         return out
     }
 
-    private fun drawTotalsCard(canvas: android.graphics.Canvas, inv: InvoiceWithDetails, top: Float): Float {
+    private fun drawTotalsCard(
+        canvas: android.graphics.Canvas,
+        inv: InvoiceWithDetails,
+        country: CountryProfile,
+        top: Float,
+    ): Float {
         val isCredit = inv.invoice.type == InvoiceType.CREDIT_NOTE
         val totalColor = if (isCredit) CREDIT_BAND else BRAND
         val showVat = inv.invoice.totalVatCents != 0L
@@ -376,11 +387,11 @@ class InvoicePdfGenerator @Inject constructor(
         var y = top + 22f
         if (showVat) {
             canvas.drawText(context.getString(R.string.pdf_totals_ht), cardLeft + 14f, y, label)
-            canvas.drawText(Money.formatEurPlain(inv.invoice.totalHtCents), cardRight - 14f, y, value)
+            canvas.drawText(country.formatMoney(inv.invoice.totalHtCents), cardRight - 14f, y, value)
             y += 22f
-            val ratePct = computeVatRatePct(inv.invoice.totalHtCents, inv.invoice.totalVatCents)
-            canvas.drawText(context.getString(R.string.pdf_totals_vat, ratePct), cardLeft + 14f, y, label)
-            canvas.drawText(Money.formatEurPlain(inv.invoice.totalVatCents), cardRight - 14f, y, value)
+            val ratePct = computeVatRatePct(inv.invoice.totalHtCents, inv.invoice.totalVatCents, country.locale)
+            canvas.drawText("${country.taxLabel} ($ratePct%)", cardLeft + 14f, y, label)
+            canvas.drawText(country.formatMoney(inv.invoice.totalVatCents), cardRight - 14f, y, value)
             y += 28f
         }
         val totalText = context.getString(
@@ -391,18 +402,17 @@ class InvoicePdfGenerator @Inject constructor(
             },
         )
         canvas.drawText(totalText, cardLeft + 14f, y, totalLabel)
-        canvas.drawText(Money.formatEurPlain(inv.invoice.totalTtcCents), cardRight - 14f, y, totalValue)
+        canvas.drawText(country.formatMoney(inv.invoice.totalTtcCents), cardRight - 14f, y, totalValue)
 
         return cardBottom
     }
 
-    private fun computeVatRatePct(htCents: Long, vatCents: Long): String {
+    private fun computeVatRatePct(htCents: Long, vatCents: Long, locale: Locale = Locale.US): String {
         if (htCents == 0L) return "0"
         val rate = (vatCents.toDouble() / htCents.toDouble()) * 100.0
-        // Render 20.0 as "20", 5.5 as "5,5"
         val rounded = Math.round(rate * 10) / 10.0
         return if (rounded == rounded.toInt().toDouble()) rounded.toInt().toString()
-        else String.format(java.util.Locale.FRANCE, "%.1f", rounded)
+        else String.format(locale, "%.1f", rounded)
     }
 
     private fun drawPaidStamp(canvas: android.graphics.Canvas, inv: InvoiceWithDetails, top: Float) {
@@ -424,7 +434,8 @@ class InvoicePdfGenerator @Inject constructor(
         canvas.drawText(stamp, MARGIN + 14f, top + 23f, label)
     }
 
-    private fun drawB2bMentions(canvas: android.graphics.Canvas, inv: InvoiceWithDetails) {
+    private fun drawB2bMentions(canvas: android.graphics.Canvas, inv: InvoiceWithDetails, country: CountryProfile) {
+        if (country !is FranceProfile) return
         if (inv.invoice.clientSiretAtIssue.isNullOrBlank()) return
         val small = Paint().apply {
             color = MUTED

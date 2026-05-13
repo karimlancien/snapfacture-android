@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ohmybattery.invoicing.R
-import com.ohmybattery.invoicing.core.money.Money
+import com.ohmybattery.invoicing.core.country.LocalCountryProfile
 import com.ohmybattery.invoicing.data.local.entity.ProductEntity
 import kotlinx.coroutines.launch
 
@@ -162,7 +162,7 @@ private fun ProductListItem(
                     else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    Money.formatEurPlain(product.priceTtcCents),
+                    LocalCountryProfile.current.formatMoney(product.priceTtcCents),
                     style = MaterialTheme.typography.titleMedium,
                     color = if (product.active) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurfaceVariant,

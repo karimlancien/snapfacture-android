@@ -41,12 +41,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ohmybattery.invoicing.R
-import com.ohmybattery.invoicing.core.money.Money
+import com.ohmybattery.invoicing.core.country.LocalCountryProfile
 import com.ohmybattery.invoicing.data.local.entity.InvoiceType
 import com.ohmybattery.invoicing.data.local.relation.InvoiceWithDetails
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
@@ -135,7 +132,7 @@ private fun PeriodSummary(period: Period, revenue: Long, count: Int) {
             Text(title, color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.labelLarge)
             Spacer(Modifier.height(4.dp))
             Text(
-                Money.formatEurPlain(revenue),
+                LocalCountryProfile.current.formatMoney(revenue),
                 color = MaterialTheme.colorScheme.onPrimary,
                 style = MaterialTheme.typography.displayLarge,
             )
@@ -195,7 +192,7 @@ private fun PeriodChip(current: Period, value: Period, label: String, onClick: (
 
 @Composable
 private fun InvoiceRow(inv: InvoiceWithDetails, isCredited: Boolean, onOpen: (Long) -> Unit) {
-    val fmt = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val profile = LocalCountryProfile.current
     val isCredit = inv.invoice.type == InvoiceType.CREDIT_NOTE
     val amountColor = if (isCredit) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
     val title = if (isCredit)
@@ -223,7 +220,7 @@ private fun InvoiceRow(inv: InvoiceWithDetails, isCredited: Boolean, onOpen: (Lo
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 )
                 Text(
-                    fmt.format(Date(inv.invoice.issueDate)),
+                    profile.formatDate(inv.invoice.issueDate),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                 )
@@ -236,7 +233,7 @@ private fun InvoiceRow(inv: InvoiceWithDetails, isCredited: Boolean, onOpen: (Lo
                 }
             }
             Text(
-                Money.formatEurPlain(inv.invoice.totalTtcCents),
+                profile.formatMoney(inv.invoice.totalTtcCents),
                 style = MaterialTheme.typography.titleLarge,
                 color = amountColor,
             )

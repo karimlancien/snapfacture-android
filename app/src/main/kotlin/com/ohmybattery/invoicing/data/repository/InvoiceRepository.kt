@@ -15,6 +15,7 @@ import com.ohmybattery.invoicing.data.local.entity.InvoiceType
 import com.ohmybattery.invoicing.data.local.entity.PaymentMethod
 import com.ohmybattery.invoicing.data.local.relation.InvoiceWithDetails
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -48,6 +49,7 @@ class InvoiceRepository @Inject constructor(
     private val companyDao: CompanyDao,
     private val auditDao: AuditDao,
     private val backupManager: BackupManager,
+    private val countryPrefs: com.ohmybattery.invoicing.data.preferences.CountryPreferences,
 ) {
 
     fun observeAll(): Flow<List<InvoiceWithDetails>> = invoiceDao.observeAllWithDetails()
@@ -208,6 +210,9 @@ class InvoiceRepository @Inject constructor(
     }
 
     private suspend fun appendAudit(invoiceId: Long?, event: String, payload: String) {
+        // Hash chain is a French anti-fraud requirement (loi anti-fraude TVA 2018).
+        // Skip in countries that don't impose it.
+        if (!countryPrefs.flow.first().profile.antiFraudHashChain) return
         val prev = auditDao.lastHash()
         val md = MessageDigest.getInstance("SHA-256")
         val raw = (prev ?: "") + "|" + event + "|" + payload + "|" + System.currentTimeMillis()

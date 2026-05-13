@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.ohmybattery.invoicing.core.country.LocalCountryProfile
 import com.ohmybattery.invoicing.ui.backup.BackupScreen
 import com.ohmybattery.invoicing.ui.company.CompanyInfoScreen
 import com.ohmybattery.invoicing.ui.csvexport.ExportScreen
@@ -30,8 +32,8 @@ import com.ohmybattery.invoicing.ui.welcome.WelcomeScreen
 
 @Composable
 fun OhmybatteryRoot(vm: StartupViewModel = hiltViewModel()) {
-    val needsOnboarding by vm.needsOnboarding.collectAsStateWithLifecycle()
-    val resolved = needsOnboarding
+    val startup by vm.state.collectAsStateWithLifecycle()
+    val resolved = startup
     if (resolved == null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
@@ -39,8 +41,9 @@ fun OhmybatteryRoot(vm: StartupViewModel = hiltViewModel()) {
         return
     }
     val nav = rememberNavController()
-    val start = if (resolved) Routes.WELCOME else Routes.INVOICES
-    NavHost(navController = nav, startDestination = start) {
+    val start = if (resolved.needsOnboarding) Routes.WELCOME else Routes.INVOICES
+    CompositionLocalProvider(LocalCountryProfile provides resolved.profile) {
+        NavHost(navController = nav, startDestination = start) {
         composable(Routes.WELCOME) {
             WelcomeScreen(
                 onDone = {
@@ -113,6 +116,7 @@ fun OhmybatteryRoot(vm: StartupViewModel = hiltViewModel()) {
         }
         composable(Routes.EXPORT) {
             ExportScreen(onBack = { nav.popBackStack() })
+        }
         }
     }
 }

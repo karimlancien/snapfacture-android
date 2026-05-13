@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ohmybattery.invoicing.R
-import com.ohmybattery.invoicing.core.money.Money
+import com.ohmybattery.invoicing.core.country.LocalCountryProfile
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -117,14 +117,14 @@ private fun KpiGrid(state: StatsUiState) {
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                Money.formatEurPlain(state.revenueTtcCents),
+                LocalCountryProfile.current.formatMoney(state.revenueTtcCents),
                 color = MaterialTheme.colorScheme.onPrimary,
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold,
             )
             Spacer(Modifier.height(2.dp))
             Text(
-                stringResource(R.string.stats_kpi_revenue_ht_value, Money.formatEurPlain(state.revenueHtCents)),
+                stringResource(R.string.stats_kpi_revenue_ht_value, LocalCountryProfile.current.formatMoney(state.revenueHtCents)),
                 color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f),
                 style = MaterialTheme.typography.bodyMedium,
             )
@@ -138,7 +138,7 @@ private fun KpiGrid(state: StatsUiState) {
         )
         MiniKpi(
             label = stringResource(R.string.stats_kpi_avg_ticket),
-            value = Money.formatEurPlain(state.averageTicketCents),
+            value = LocalCountryProfile.current.formatMoney(state.averageTicketCents),
             modifier = Modifier.weight(1f),
         )
     }
@@ -170,7 +170,7 @@ private fun TaxCard(state: StatsUiState) {
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                Money.formatEurPlain(state.taxCents),
+                LocalCountryProfile.current.formatMoney(state.taxCents),
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -218,7 +218,7 @@ private fun LeadersCard(title: String, items: List<StatsLeader>) {
                             )
                         }
                         Text(
-                            Money.formatEurPlain(leader.totalCents),
+                            LocalCountryProfile.current.formatMoney(leader.totalCents),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.primary,

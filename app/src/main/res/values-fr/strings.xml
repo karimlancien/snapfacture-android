@@ -158,6 +158,7 @@
     <string name="company_website">Site web</string>
     <string name="company_manager">Gérant</string>
     <string name="company_next_invoice_number">Prochain n° de facture</string>
+    <string name="company_default_sales_tax">Taux par défaut de Sales Tax % (ex. 7,25)</string>
     <string name="company_country_section">Pays / régime fiscal</string>
     <string name="company_tax_regime_section">Régime de %1$s</string>
     <string name="company_franchise_label">Franchise de %1$s</string>

@@ -20,4 +20,5 @@ data class CompanyEntity(
     val managerName: String,
     val iban: String?,
     val nextInvoiceNumber: Int,
+    val defaultTaxPermille: Int = 0,
 )
