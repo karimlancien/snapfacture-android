@@ -36,7 +36,7 @@ jobs:
         shell: bash
         run: |
           set -eo pipefail
-          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
+          ./gradlew testDebugUnitTest assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
 
       - name: Upload build log
         if: always()
