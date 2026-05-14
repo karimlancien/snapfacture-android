@@ -44,9 +44,6 @@
     <string name="create_phone_required">Phone *</string>
     <string name="create_email_hint">Email (for auto-send of invoices)</string>
     <string name="create_address_required">Full address *</string>
-    <string name="create_vehicle_section">Vehicle (optional)</string>
-    <string name="create_vehicle_model">Model</string>
-    <string name="create_vehicle_plate">Plate</string>
     <string name="create_catalog_section">Catalog</string>
     <string name="create_with_service">With on-site service</string>
     <string name="create_product_only">Product only</string>
@@ -143,7 +140,6 @@
     <string name="pdf_issued_on_f">Issued on %1$s</string>
     <string name="pdf_issued_on_m">Issued on %1$s</string>
     <string name="pdf_billed_to">BILLED TO</string>
-    <string name="pdf_vehicle">VEHICLE</string>
     <string name="pdf_comment">COMMENT</string>
     <string name="pdf_meta_issue_date">Issue date</string>
     <string name="pdf_meta_due_date">Due date</string>
@@ -227,7 +223,7 @@
     <string name="catalog_edit_service_label">On-site service included</string>
     <string name="catalog_edit_service_subtitle">Automatically adds a service note on the invoice (intervention at the customer location).</string>
     <string name="catalog_edit_service_note_label">Service note</string>
-    <string name="catalog_edit_service_note_hint">e.g. On-site installation by our technician</string>
+    <string name="catalog_edit_service_note_hint">e.g. Service performed at the customer location</string>
     <string name="catalog_edit_active_label">Active in catalog</string>
     <string name="catalog_edit_save_new">Add</string>
     <string name="catalog_edit_save_existing">Save</string>

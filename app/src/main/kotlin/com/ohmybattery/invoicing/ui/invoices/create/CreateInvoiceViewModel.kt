@@ -37,8 +37,6 @@ data class CreateUiState(
     val clientAddress: String = "",
     val isPro: Boolean = false,
     val clientSiret: String = "",
-    val vehicleModel: String = "",
-    val vehicleRegistration: String = "",
     val comment: String = "",
     val matchingClients: List<ClientEntity> = emptyList(),
     val selectedClient: ClientEntity? = null,
@@ -125,9 +123,6 @@ class CreateInvoiceViewModel @Inject constructor(
         it.copy(isPro = newIsPro, clientSiret = if (newIsPro) it.clientSiret else "")
     }
     fun onSiretChange(s: String) = _state.update { it.copy(clientSiret = s.filter { c -> c.isDigit() }.take(14)) }
-    fun onVehicleModelChange(s: String) = _state.update { it.copy(vehicleModel = s) }
-    fun onVehicleRegistrationChange(s: String) =
-        _state.update { it.copy(vehicleRegistration = s.uppercase()) }
     fun onCommentChange(s: String) = _state.update { it.copy(comment = s) }
 
     fun addProduct(b: ProductEntity) {
@@ -194,8 +189,6 @@ class CreateInvoiceViewModel @Inject constructor(
                         issueDateMillis = now,
                         deliveryDateMillis = if (lines.any { it.extraNote != null }) now else null,
                         issuerName = company.managerName.ifBlank { company.name },
-                        vehicleModel = st.vehicleModel.ifBlank { null },
-                        vehicleRegistration = st.vehicleRegistration.ifBlank { null },
                         comment = st.comment.ifBlank { null },
                         taxOptedOut = st.taxOptedOut,
                         clientSiret = effectiveSiret,

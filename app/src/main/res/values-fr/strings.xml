@@ -44,9 +44,6 @@
     <string name="create_phone_required">Téléphone *</string>
     <string name="create_email_hint">Email (pour envoi auto de la facture)</string>
     <string name="create_address_required">Adresse complète *</string>
-    <string name="create_vehicle_section">Véhicule (optionnel)</string>
-    <string name="create_vehicle_model">Modèle</string>
-    <string name="create_vehicle_plate">Immat.</string>
     <string name="create_catalog_section">Catalogue</string>
     <string name="create_with_service">Avec service à domicile</string>
     <string name="create_product_only">Produit seul</string>
@@ -87,7 +84,7 @@
     <string name="credit_dialog_title">Émettre un avoir</string>
     <string name="credit_dialog_intro">Un avoir va être généré pour annuler cette facture. La facture originale reste conservée (obligation légale).</string>
     <string name="credit_dialog_motif_label">Motif (optionnel)</string>
-    <string name="credit_dialog_motif_hint">Ex: erreur de saisie, retour batterie...</string>
+    <string name="credit_dialog_motif_hint">Ex : erreur de saisie, retour produit, prestation annulée…</string>
     <string name="credit_dialog_confirm">Émettre l\'avoir</string>
 
     <!-- Settings -->
@@ -179,7 +176,7 @@
     <string name="catalog_edit_service_label">Service à domicile inclus</string>
     <string name="catalog_edit_service_subtitle">Ajoute automatiquement une note de service sur la facture (intervention chez le client).</string>
     <string name="catalog_edit_service_note_label">Note de service</string>
-    <string name="catalog_edit_service_note_hint">Ex: Pose à domicile par notre technicien</string>
+    <string name="catalog_edit_service_note_hint">Ex : Prestation effectuée chez le client</string>
     <string name="catalog_edit_active_label">Actif dans le catalogue</string>
     <string name="catalog_edit_save_new">Ajouter</string>
     <string name="catalog_edit_save_existing">Enregistrer</string>
@@ -240,7 +237,6 @@
     <string name="pdf_issued_on_f">Émise le %1$s</string>
     <string name="pdf_issued_on_m">Émis le %1$s</string>
     <string name="pdf_billed_to">FACTURÉ À</string>
-    <string name="pdf_vehicle">VÉHICULE</string>
     <string name="pdf_comment">COMMENTAIRE</string>
     <string name="pdf_meta_issue_date">Date d\'émission</string>
     <string name="pdf_meta_due_date">Échéance</string>

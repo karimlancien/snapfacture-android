@@ -19,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material.icons.filled.Person
@@ -265,33 +264,6 @@ private fun DeliveryCard(state: CreateUiState, vm: CreateInvoiceViewModel) {
                 placeholder = { Text(stringResource(R.string.create_address_required)) },
                 isError = state.clientAddress.isBlank(),
             )
-            Spacer(Modifier.height(12.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.DirectionsCar, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(Modifier.size(8.dp))
-                Text(
-                    stringResource(R.string.create_vehicle_section),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = state.vehicleModel,
-                    onValueChange = vm::onVehicleModelChange,
-                    modifier = Modifier.weight(1.5f),
-                    placeholder = { Text(stringResource(R.string.create_vehicle_model)) },
-                    singleLine = true,
-                )
-                OutlinedTextField(
-                    value = state.vehicleRegistration,
-                    onValueChange = vm::onVehicleRegistrationChange,
-                    modifier = Modifier.weight(1f),
-                    placeholder = { Text(stringResource(R.string.create_vehicle_plate)) },
-                    singleLine = true,
-                )
-            }
         }
     }
 }
