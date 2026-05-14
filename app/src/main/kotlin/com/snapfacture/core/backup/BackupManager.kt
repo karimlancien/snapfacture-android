@@ -74,10 +74,15 @@ class BackupManager @Inject constructor(
 
     suspend fun runBackup(folderUri: Uri): BackupResult = withContext(Dispatchers.IO) {
         try {
+            // Force every WAL frame back into the main .db file and clear the
+            // WAL itself. FULL alone leaves frames in the WAL file; if we then
+            // copy only the .db file, those frames are lost. TRUNCATE solves
+            // that. moveToFirst() is required because Android's SQLite driver
+            // defers PRAGMA execution until the cursor is actually read.
             runCatching {
                 database.openHelper.writableDatabase
-                    .query("PRAGMA wal_checkpoint(FULL)")
-                    .use { /* drained */ }
+                    .query("PRAGMA wal_checkpoint(TRUNCATE)")
+                    .use { it.moveToFirst() }
             }
 
             val folder = DocumentFile.fromTreeUri(context, folderUri)

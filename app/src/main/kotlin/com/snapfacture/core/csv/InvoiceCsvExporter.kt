@@ -42,7 +42,7 @@ class InvoiceCsvExporter @Inject constructor(
         postal: String?,
         city: String?,
     ): List<String> = listOf(
-        "Facture",
+        if (inv.invoice.type == com.snapfacture.data.local.entity.InvoiceType.CREDIT_NOTE) "Avoir" else "Facture",
         inv.invoice.number.toString(),
         "",                                       // Référence
         "",                                       // Commande N°
