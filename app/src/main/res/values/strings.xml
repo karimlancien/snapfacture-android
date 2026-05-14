@@ -15,7 +15,7 @@
 
     <!-- Invoice list -->
     <string name="invoice_list_new">New invoice</string>
-    <string name="invoice_list_search_hint">Search (customer, invoice #, plate...)</string>
+    <string name="invoice_list_search_hint">Search (customer, invoice #...)</string>
     <string name="invoice_list_period_month">Month</string>
     <string name="invoice_list_period_year">Year</string>
     <string name="invoice_list_period_all">All</string>
